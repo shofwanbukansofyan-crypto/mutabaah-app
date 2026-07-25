@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun - Sistem Mutaba'ah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #fdfbf7;
+            background-image: 
+                linear-gradient(30deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(150deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(30deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(150deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(60deg, #f0ebd877 25%, transparent 25.5%, transparent 75%, #f0ebd877 75%, #f0ebd877), 
+                linear-gradient(60deg, #f0ebd877 25%, transparent 25.5%, transparent 75%, #f0ebd877 75%, #f0ebd877);
+            background-size: 40px 70px;
+            background-position: 0 0, 0 0, 20px 35px, 20px 35px, 0 0, 20px 35px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 font-serif">
+
+    <div class="w-full max-w-md bg-white/95 p-8 rounded-xl shadow-2xl border-4 border-[#c5a059]">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-[#113f59] mb-2">تسجيل حساب جديد</h1>
+            <p class="text-gray-600 font-semibold border-b-2 border-[#c5a059] pb-4">
+                Daftar Akun Mutaba'ah
+            </p>
+        </div>
+
+        <form id="registerForm" class="space-y-4">
+            <div>
+                <label class="block text-[#113f59] font-bold mb-1">Nama Lengkap</label>
+                <input type="text" id="nama_lengkap" required 
+                    class="w-full border-2 border-[#c5a059] px-4 py-2 rounded outline-none focus:border-[#113f59] bg-[#fdfbf7] transition-colors" 
+                    placeholder="Contoh: Muhammad ">
+            </div>
+
+            <div>
+                <label class="block text-[#113f59] font-bold mb-1">Username</label>
+                <!-- Tambahan atribut name & autocomplete untuk memicu Save Password Browser -->
+                <input type="text" id="username" name="username" autocomplete="username" required 
+                    class="w-full border-2 border-[#c5a059] px-4 py-2 rounded outline-none focus:border-[#113f59] bg-[#fdfbf7] transition-colors" 
+                    placeholder="Buat username untuk login">
+            </div>
+
+            <div>
+                <label class="block text-[#113f59] font-bold mb-1">Password</label>
+                <!-- Tambahan atribut name & autocomplete untuk memicu Save Password Browser -->
+                <input type="password" id="password" name="password" autocomplete="new-password" required 
+                    class="w-full border-2 border-[#c5a059] px-4 py-2 rounded outline-none focus:border-[#113f59] bg-[#fdfbf7] transition-colors" 
+                    placeholder="Buat password">
+            </div>
+
+            <div>
+                <label class="block text-[#113f59] font-bold mb-1">Mendaftar Sebagai:</label>
+                <select id="role" required class="w-full border-2 border-[#c5a059] px-4 py-2 rounded outline-none focus:border-[#113f59] bg-[#fdfbf7] cursor-pointer">
+                    <option value="" disabled selected>- Pilih Role -</option>
+                    <option value="guru">Muhaffidz</option>
+                    <option value="murid">Murid</option>
+                </select>
+            </div>
+
+            <!-- Tambahan Checkbox Info Login (Visual) -->
+            <div class="flex items-center">
+                <input type="checkbox" id="rememberMe" class="w-4 h-4 text-[#113f59] border-[#c5a059] rounded focus:ring-[#113f59] cursor-pointer" checked>
+                <label for="rememberMe" class="ml-2 text-sm font-bold text-[#113f59] cursor-pointer">Simpan info login saya (Tetap Masuk)</label>
+            </div>
+
+            <div id="statusMessage" class="font-bold text-sm hidden text-center mt-2"></div>
+
+            <button type="submit" 
+                class="w-full bg-[#113f59] text-white font-bold px-6 py-3 rounded shadow hover:bg-[#0c2d40] border border-[#c5a059] transition-all mt-4">
+                Daftar Sekarang
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="text-sm text-gray-600">Sudah punya akun? <a href="login.html" class="text-[#c5a059] font-bold hover:underline">Login di sini</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nama = document.getElementById('nama_lengkap').value;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const statusMsg = document.getElementById('statusMessage');
+
+            try {
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        nama_lengkap: nama, 
+                        username: user, 
+                        password: pass, 
+                        role: role 
+                    })
+                });
+
+                const data = await response.json();
+
+                statusMsg.classList.remove('hidden');
+
+                if (response.ok) {
+                    statusMsg.className = "font-bold text-sm text-green-600 text-center mt-2";
+                    statusMsg.innerText = data.message;
+                    
+                    // LANGSUNG LOGIN: Simpan token dan data user ke LocalStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', data.role);
+                    localStorage.setItem('nama', data.nama);
+                    
+                    // Beri jeda 1 detik agar browser sempat memunculkan pop-up 'Save Password', 
+                    // lalu otomatis pindah ke Menu Utama
+                    setTimeout(() => {
+                        window.location.href = 'menu-utama.html';
+                    }, 1000);
+
+                } else {
+                    statusMsg.className = "font-bold text-sm text-red-500 text-center mt-2";
+                    statusMsg.innerText = data.error;
+                }
+            } catch (error) {
+                statusMsg.classList.remove('hidden');
+                statusMsg.className = "font-bold text-sm text-red-500 text-center mt-2";
+                statusMsg.innerText = "Gagal terhubung ke server.";
+            }
+        });
+    </script>
+</body>
+</html>

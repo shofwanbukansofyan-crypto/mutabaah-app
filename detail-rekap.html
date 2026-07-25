@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail & Edit Rekapan Hafalan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #fdfbf7;
+            background-image: 
+                linear-gradient(30deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(150deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8);
+            background-size: 40px 70px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-sm md:text-base font-serif">
+
+    <div class="max-w-6xl mx-auto bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
+        
+        <div class="flex justify-between items-start mb-8 pb-4 border-b-2 border-[#c5a059]">
+            <a href="daftar-rekap.html" class="text-[#113f59] font-bold hover:underline flex items-center gap-1">
+                &larr; Kembali
+            </a>
+            <div class="text-center flex-1">
+                <div class="inline-block bg-[#113f59] text-white px-10 py-2 rounded-[2rem] shadow-md border-2 border-[#c5a059] mb-4">
+                    <h1 id="judulHalaman" class="text-2xl font-bold">Detail Mutaba'ah Mingguan</h1>
+                </div>
+                
+                <div class="flex flex-col md:flex-row justify-center gap-6 text-[#113f59] font-bold text-lg" dir="rtl">
+                    <div class="flex items-center gap-2">
+                        <label>Pekan Ke- :</label>
+                        <span id="viewPekan" class="text-[#c5a059]">-</span>
+                        <input type="number" id="editPekan" class="hidden border-b-2 border-[#c5a059] bg-transparent px-2 w-20 text-center outline-none">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label>Tanggal Mulai :</label>
+                        <span id="viewTanggal" class="text-[#c5a059]">-</span>
+                        <input type="date" id="editTanggal" class="hidden border-b-2 border-[#c5a059] bg-transparent px-2 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="w-24"></div>
+        </div>
+
+        <div class="overflow-x-auto mb-8">
+            <table class="w-full text-right border-collapse border-4 border-[#c5a059] min-w-[800px]" dir="rtl">
+                <thead class="bg-[#113f59] text-white">
+                    <tr>
+                        <th class="border border-[#c5a059] p-3 w-[10%]">اليوم (Hari)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">الحفظ (Hafalan)</th>
+                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">المراجعة (Muroja'ah)</th>
+                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">ملاحظات (Catatan)</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelDetailHarian" class="text-[#113f59] bg-[#fdfbf7]">
+                    <tr><td colspan="6" class="p-4 text-center italic text-gray-500">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="border-2 border-[#c5a059] p-5 rounded-lg bg-[#fdfbf7] text-left text-[#113f59]" dir="ltr">
+            <h2 class="text-xl font-bold mb-4 border-b-2 border-[#c5a059] pb-2 text-center">Evaluasi Mingguan</h2>
+            <div class="mb-4 flex flex-col md:flex-row gap-2 items-center">
+                <label class="md:w-1/3 font-semibold">Pencapaian Terbaik / Saran :</label>
+                <span id="viewSaran" class="md:w-2/3 font-medium">-</span>
+                <input type="text" id="editSaran" class="hidden md:w-2/3 border-b border-dashed border-[#113f59] bg-transparent outline-none py-1">
+            </div>
+            <div class="flex flex-col md:flex-row gap-2 items-center">
+                <label class="md:w-1/3 font-semibold">Catatan Umum :</label>
+                <span id="viewCatatan" class="md:w-2/3 font-medium">-</span>
+                <input type="text" id="editCatatan" class="hidden md:w-2/3 border-b border-dashed border-[#113f59] bg-transparent outline-none py-1">
+            </div>
+        </div>
+
+        <!-- Tombol Simpan Perubahan (Hanya muncul untuk Guru) -->
+        <div id="containerBtnSimpan" class="mt-6 text-center hidden">
+            <button id="btnSimpanEdit" class="bg-[#113f59] text-white font-bold px-8 py-2.5 rounded shadow-lg hover:bg-[#0c2d40] border border-[#c5a059] transition-all">
+                Simpan Perubahan Rekapan
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token) { window.location.href = 'login.html'; }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const rekapanId = urlParams.get('id');
+        if (!rekapanId) { window.location.href = 'daftar-rekap.html'; }
+
+        let dataGlobalHarian = [];
+
+        async function loadDetail() {
+            try {
+                const res = await fetch(`http://localhost:3000/api/rekapan/${rekapanId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    const m = data.mingguan;
+                    dataGlobalHarian = data.harian;
+
+                    // Jika yang login GURU, aktifkan mode edit di layar
+                    if (role === 'guru') {
+                        document.getElementById('judulHalaman').innerText = "Edit Mutaba'ah Mingguan";
+                        
+                        document.getElementById('viewPekan').classList.add('hidden');
+                        document.getElementById('editPekan').classList.remove('hidden');
+                        document.getElementById('editPekan').value = m.pekan_ke;
+
+                        document.getElementById('viewTanggal').classList.add('hidden');
+                        document.getElementById('editTanggal').classList.remove('hidden');
+                        document.getElementById('editTanggal').value = m.tanggal_mulai;
+
+                        document.getElementById('viewSaran').classList.add('hidden');
+                        document.getElementById('editSaran').classList.remove('hidden');
+                        document.getElementById('editSaran').value = m.pencapaian_terbaik || '';
+
+                        document.getElementById('viewCatatan').classList.add('hidden');
+                        document.getElementById('editCatatan').classList.remove('hidden');
+                        document.getElementById('editCatatan').value = m.catatan_umum || '';
+
+                        document.getElementById('containerBtnSimpan').classList.remove('hidden');
+                    } else {
+                        // Mode Siswa (Read-Only)
+                        document.getElementById('viewPekan').innerText = m.pekan_ke;
+                        document.getElementById('viewTanggal').innerText = m.tanggal_mulai;
+                        document.getElementById('viewSaran').innerText = m.pencapaian_terbaik || '-';
+                        document.getElementById('viewCatatan').innerText = m.catatan_umum || '-';
+                    }
+
+                    // Render Tabel (Beda wujud antara Guru vs Siswa)
+                    const tbody = document.getElementById('tabelDetailHarian');
+                    tbody.innerHTML = '';
+
+                    data.harian.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-[#f0ebd8]/50 transition-colors bg-[#fdfbf7]";
+
+                        if (role === 'guru') {
+                            // Tampilkan dalam bentuk Kotak Input & Select agar bisa diubah Ustadz
+                            tr.innerHTML = `
+                                <td class="border border-[#c5a059] p-2 font-bold text-center" data-hari="${row.hari}">${row.hari}</td>
+                                <td class="border border-[#c5a059] p-0"><input type="text" class="input-hafalan w-full h-full p-2 bg-transparent outline-none focus:bg-[#f0ebd8]" value="${row.hafalan_surah_ayat || ''}"></td>
+                                <td class="border border-[#c5a059] p-0">
+                                    <select class="select-nilai-hafalan w-full h-full p-2 bg-transparent outline-none cursor-pointer">
+                                        <option value="">- Nilai -</option>
+                                        <option value="mumtaz" ${row.nilai_hafalan === 'mumtaz' ? 'selected' : ''}>ممتاز</option>
+                                        <option value="jayyid_jiddan" ${row.nilai_hafalan === 'jayyid_jiddan' ? 'selected' : ''}>جيد جدا</option>
+                                        <option value="jayyid" ${row.nilai_hafalan === 'jayyid' ? 'selected' : ''}>جيد</option>
+                                    </select>
+                                </td>
+                                <td class="border border-[#c5a059] p-0"><input type="text" class="input-murojaah w-full h-full p-2 bg-transparent outline-none focus:bg-[#f0ebd8]" value="${row.murojaah_surah_ayat || ''}"></td>
+                                <td class="border border-[#c5a059] p-0">
+                                    <select class="select-nilai-murojaah w-full h-full p-2 bg-transparent outline-none cursor-pointer">
+                                        <option value="">- Nilai -</option>
+                                        <option value="mumtaz" ${row.nilai_murojaah === 'mumtaz' ? 'selected' : ''}>ممتاز</option>
+                                        <option value="jayyid_jiddan" ${row.nilai_murojaah === 'jayyid_jiddan' ? 'selected' : ''}>جيد جدا</option>
+                                        <option value="jayyid" ${row.nilai_murojaah === 'jayyid' ? 'selected' : ''}>جيد</option>
+                                    </select>
+                                </td>
+                                <td class="border border-[#c5a059] p-0"><input type="text" class="input-catatan w-full h-full p-2 bg-transparent outline-none focus:bg-[#f0ebd8]" value="${row.catatan_harian || ''}"></td>
+                            `;
+                        } else {
+                            // Tampilkan sebagai Teks Biasa untuk Siswa
+                            tr.innerHTML = `
+                                <td class="border border-[#c5a059] p-3 font-bold text-center">${row.hari}</td>
+                                <td class="border border-[#c5a059] p-3 font-semibold">${row.hafalan_surah_ayat || '-'}</td>
+                                <td class="border border-[#c5a059] p-3 text-[#c5a059] font-bold">${row.nilai_hafalan || '-'}</td>
+                                <td class="border border-[#c5a059] p-3 font-semibold">${row.murojaah_surah_ayat || '-'}</td>
+                                <td class="border border-[#c5a059] p-3 text-[#c5a059] font-bold">${row.nilai_murojaah || '-'}</td>
+                                <td class="border border-[#c5a059] p-3 text-sm">${row.catatan_harian || '-'}</td>
+                            `;
+                        }
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    alert('Gagal memuat detail.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Tombol Simpan Perubahan oleh Guru
+        if (role === 'guru') {
+            document.getElementById('btnSimpanEdit').addEventListener('click', async () => {
+                const pekan_ke = document.getElementById('editPekan').value;
+                const tanggal_mulai = document.getElementById('editTanggal').value;
+                const saran_pengembangan = document.getElementById('editSaran').value;
+                const catatan_umum = document.getElementById('editCatatan').value;
+
+                const data_harian = [];
+                const barisTabel = document.querySelectorAll('#tabelDetailHarian tr');
+
+                barisTabel.forEach(baris => {
+                    const hari = baris.querySelector('td').getAttribute('data-hari');
+                    const hafalan = baris.querySelector('.input-hafalan').value;
+                    const nilai_hafalan = baris.querySelector('.select-nilai-hafalan').value;
+                    const murojaah = baris.querySelector('.input-murojaah').value;
+                    const nilai_murojaah = baris.querySelector('.select-nilai-murojaah').value;
+                    const catatan = baris.querySelector('.input-catatan').value;
+
+                    data_harian.push({ nama_hari: hari, hafalan, nilai_hafalan, murojaah, nilai_murojaah, catatan });
+                });
+
+                try {
+                    const res = await fetch(`http://localhost:3000/api/rekapan/${rekapanId}/edit`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum, data_harian })
+                    });
+                    const result = await res.json();
+
+                    if (res.ok) {
+                        alert(result.message);
+                        window.location.href = 'daftar-rekap.html';
+                    } else {
+                        alert('Gagal: ' + result.error);
+                    }
+                } catch (err) {
+                    alert('Terjadi kesalahan jaringan.');
+                }
+            });
+        }
+
+        window.onload = loadDetail;
+    </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Utama - Sistem Mutaba'ah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Pattern background khas Islami */
+        body {
+            background-color: #fdfbf7;
+            background-image: 
+                linear-gradient(30deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(150deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(30deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(150deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(60deg, #f0ebd877 25%, transparent 25.5%, transparent 75%, #f0ebd877 75%, #f0ebd877), 
+                linear-gradient(60deg, #f0ebd877 25%, transparent 25.5%, transparent 75%, #f0ebd877 75%, #f0ebd877);
+            background-size: 40px 70px;
+            background-position: 0 0, 0 0, 20px 35px, 20px 35px, 0 0, 20px 35px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 font-serif flex flex-col items-center">
+
+    <!-- Header Profil -->
+    <div class="w-full max-w-4xl bg-white/95 p-6 rounded-xl shadow-md border-b-4 border-[#c5a059] mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-[#113f59]">Ahlan wa Sahlan,</h1>
+            <!-- Nama dan Role akan diisi otomatis oleh Javascript -->
+            <p id="namaUser" class="text-xl font-bold text-[#c5a059] mt-1">Memuat data...</p>
+            <span id="roleBadge" class="inline-block mt-2 px-3 py-1 text-xs font-bold text-white bg-[#113f59] rounded-full">...</span>
+        </div>
+        <div>
+            <button id="btnLogout" class="text-red-500 font-bold hover:text-red-700 transition-colors border-2 border-red-500 px-4 py-2 rounded-lg hover:bg-red-50">
+                Keluar (Logout)
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid Menu Utama -->
+    <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Menu 1: Rekapan Pekanan -->
+        <a href="daftar-rekap.html" class="group bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059] hover:bg-[#113f59] hover:border-[#113f59] transition-all flex flex-col items-center text-center cursor-pointer">
+            <div class="w-16 h-16 bg-[#f0ebd8] rounded-full flex items-center justify-center mb-4 group-hover:bg-white transition-colors">
+                <svg class="w-8 h-8 text-[#113f59]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            <h2 class="text-xl font-bold text-[#113f59] group-hover:text-white mb-2">Rekapan Pekanan</h2>
+            <p class="text-sm text-gray-600 group-hover:text-gray-200">Lihat riwayat hafalan dan mutaba'ah mingguan.</p>
+        </a>
+
+        <!-- Menu 2: Target Muroja'ah -->
+        <!-- Menu 2: Target Muroja'ah -->
+        <a href="#" id="linkTarget" class="group bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059] hover:bg-[#113f59] hover:border-[#113f59] transition-all flex flex-col items-center text-center cursor-pointer">
+            <div class="w-16 h-16 bg-[#f0ebd8] rounded-full flex items-center justify-center mb-4 group-hover:bg-white transition-colors">
+                <svg class="w-8 h-8 text-[#113f59]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            </div>
+            <h2 class="text-xl font-bold text-[#113f59] group-hover:text-white mb-2">Target Muroja'ah</h2>
+            <p class="text-sm text-gray-600 group-hover:text-gray-200">Cek dan validasi target harian muroja'ah.</p>
+        </a>
+
+        <!-- Menu 3: Ujian Kenaikan Juz -->
+        <a href="ujian-juz.html" class="group bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059] hover:bg-[#113f59] hover:border-[#113f59] transition-all flex flex-col items-center text-center cursor-pointer">
+            <div class="w-16 h-16 bg-[#f0ebd8] rounded-full flex items-center justify-center mb-4 group-hover:bg-white transition-colors">
+                <svg class="w-8 h-8 text-[#113f59]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <h2 class="text-xl font-bold text-[#113f59] group-hover:text-white mb-2">Ujian Kenaikan Juz</h2>
+            <p class="text-sm text-gray-600 group-hover:text-gray-200">Persiapan dan status ujian kelipatan 3 Juz.</p>
+        </a>
+
+    </div>
+
+    <!-- Script Proteksi Halaman & Ambil Data -->
+    <script>
+        // 1. Cek apakah user sudah login (punya token)
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Anda harus login terlebih dahulu!');
+            window.location.href = 'login.html'; // Usir balik ke halaman login
+        }
+
+        // 2. Ambil data nama dan role dari LocalStorage
+        const nama = localStorage.getItem('nama');
+        const role = localStorage.getItem('role');
+
+        // 3. Tampilkan data ke layar
+        document.getElementById('namaUser').innerText = nama;
+        
+        const badge = document.getElementById('roleBadge');
+        if (role === 'guru') {
+            badge.innerText = 'Pengajar / Ustadz';
+            badge.className = "inline-block mt-2 px-3 py-1 text-xs font-bold text-[#113f59] bg-[#c5a059] rounded-full";
+        } else {
+            badge.innerText = 'Siswa / Santri';
+            badge.className = "inline-block mt-2 px-3 py-1 text-xs font-bold text-white bg-[#113f59] rounded-full";
+        }
+
+        // 4. Logika Arah Menu Target Muroja'ah 
+        const btnTarget = document.getElementById('linkTarget');
+        if (role === 'guru') {
+            btnTarget.href = 'input-target.html'; 
+        } else {
+            btnTarget.href = 'target-saya.html'; 
+        }
+
+        // 5. Logika Logout
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            const konfirmasi = confirm("Yakin ingin keluar?");
+            if (konfirmasi) {
+                localStorage.clear(); // Hapus semua data sesi
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>

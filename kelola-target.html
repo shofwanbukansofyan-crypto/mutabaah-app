@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Target Muroja'ah - Ustadz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #fdfbf7;
+            background-image: 
+                linear-gradient(30deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(150deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8);
+            background-size: 40px 70px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-serif">
+
+    <div class="max-w-4xl mx-auto bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
+        
+        <div class="flex justify-between items-center mb-6 border-b-2 border-[#c5a059] pb-4">
+            <a href="input-target.html" class="text-[#113f59] font-bold hover:underline">&larr; Kembali ke Input</a>
+            <h1 class="text-2xl font-bold text-[#113f59]">Kelola & Edit Target</h1>
+            <div class="w-24"></div>
+        </div>
+
+        <div class="flex flex-wrap items-end gap-4 mb-8 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block font-bold text-[#113f59] mb-1">Pilih Siswa:</label>
+                <select id="pilihMurid" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white outline-none cursor-pointer">
+                    <option value="" disabled selected>- Memuat Siswa -</option>
+                </select>
+            </div>
+            <div class="w-32">
+                <label class="block font-bold text-[#113f59] mb-1">Pekan Ke-:</label>
+                <input type="number" id="inputPekan" value="1" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold outline-none">
+            </div>
+            <button onclick="cariTarget()" class="bg-[#113f59] text-white font-bold px-6 py-2 rounded shadow hover:bg-[#0c2d40] border border-[#c5a059] h-[44px]">
+                Cari Target
+            </button>
+        </div>
+
+        <!-- Daftar Target yang Bisa Diedit -->
+        <div id="listEditTarget" class="space-y-4">
+            <p class="text-center text-gray-500 italic py-8">Silakan pilih siswa dan pekan untuk menampilkan target.</p>
+        </div>
+
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (role !== 'guru' || !token) { window.location.href = 'login.html'; }
+
+        // Ambil daftar murid buat dropdown
+        async function loadMurid() {
+            const res = await fetch('http://localhost:3000/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            const select = document.getElementById('pilihMurid');
+            select.innerHTML = '<option value="" disabled selected>- Pilih Siswa -</option>';
+            data.forEach(m => {
+                select.innerHTML += `<option value="${m.id}">${m.nama_lengkap}</option>`;
+            });
+        }
+        loadMurid();
+
+        // Cari dan Tampilkan Target
+        async function cariTarget() {
+            const muridId = document.getElementById('pilihMurid').value;
+            const pekanKe = document.getElementById('inputPekan').value;
+            const container = document.getElementById('listEditTarget');
+
+            if (!muridId) { alert('Pilih siswa dulu!'); return; }
+
+            container.innerHTML = '<p class="text-center">Mencari data...</p>';
+
+            const res = await fetch(`http://localhost:3000/api/target?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-center text-red-500 font-bold py-4">Belum ada target di pekan ke-${pekanKe} untuk siswa ini.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            data.forEach(item => {
+                // Tampilkan badge kalau tugas sudah selesai dikerjakan siswa
+                const badgeStatus = item.status_selesai === 1 
+                    ? `<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">Selesai Dikerjakan</span>` 
+                    : `<span class="text-xs font-bold text-gray-500">Belum Dikerjakan</span>`;
+
+                container.innerHTML += `
+                    <div class="flex flex-col md:flex-row md:items-center gap-3 bg-[#f0ebd8]/40 p-4 rounded border border-[#c5a059]">
+                        <div class="w-32">
+                            <span class="font-bold text-[#113f59] text-lg block">${item.hari}</span>
+                            ${badgeStatus}
+                        </div>
+                        <input type="text" id="edit-isi-${item.id}" value="${item.isi_target}" 
+                            class="flex-1 border border-[#c5a059] p-2 rounded bg-white outline-none focus:ring-1 focus:ring-[#113f59]">
+                        <button onclick="simpanPerubahan(${item.id})" class="bg-[#c5a059] text-[#113f59] font-bold px-4 py-2 rounded shadow hover:bg-yellow-600 hover:text-white transition-colors whitespace-nowrap">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // Fungsi Simpan Perubahan API
+        async function simpanPerubahan(id) {
+            const inputBaru = document.getElementById(`edit-isi-${id}`).value;
+            
+            try {
+                const res = await fetch(`http://localhost:3000/api/target/${id}/edit`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ isi_target: inputBaru })
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    alert('Sukses: ' + result.message);
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Gagal terhubung ke server.');
+            }
+        }
+    </script>
+</body>
+</html>
