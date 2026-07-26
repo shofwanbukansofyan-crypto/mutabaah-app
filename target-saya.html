@@ -25,6 +25,17 @@
             <div class="w-20"></div>
         </div>
 
+        <!-- Indikator Pekan Aktif & Progress Bar -->
+<div class="mb-6 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
+    <div class="flex justify-between items-center mb-2">
+        <span class="font-bold text-[#113f59]">Progres Pekan Ini:</span>
+        <span id="textProgres" class="font-bold text-[#c5a059]">0 / 0 Selesai (0%)</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-3 border border-[#c5a059]/40 overflow-hidden">
+        <div id="progressBar" class="bg-[#113f59] h-full transition-all duration-300" style="width: 0%"></div>
+    </div>
+</div>
+
         <div class="text-center mb-4">
     <span class="bg-[#113f59] text-white text-xs px-3 py-1 rounded-full font-semibold">
         📅 Pekan Aktif Saat Ini: <span id="labelPekanAktif" class="text-[#c5a059] font-bold">-</span>
@@ -47,6 +58,11 @@
         const token = localStorage.getItem('token');
         if (!token) { window.location.href = 'login.html'; }
 
+        // Jalankan cek pekan aktif saat halaman pertama kali dibuka
+        window.onload = function() {
+            cekPekanAktif();
+        };
+
         async function loadTargetSaya() {
             const pekan = document.getElementById('filterPekan').value;
             const container = document.getElementById('listTarget');
@@ -60,11 +76,15 @@
 
             if (data.length === 0) {
                 container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
+                updateProgress(0, 0);
                 return;
             }
 
+            let selesaiCount = 0;
             container.innerHTML = '';
+            
             data.forEach(item => {
+                if (item.status_selesai === 1) selesaiCount++;
                 const isChecked = item.status_selesai === 1 ? 'checked' : '';
                 const styleCoret = item.status_selesai === 1 ? 'line-through text-gray-400' : 'text-[#113f59]';
 
@@ -82,19 +102,45 @@
                     </div>
                 `;
             });
+
+            // Update tampilan progress bar
+            updateProgress(selesaiCount, data.length);
         }
 
         async function cekPekanAktif() {
-    const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
-    const data = await res.json();
-    if (data.length > 0) {
-        // Ambil pekan terbesar yang ada di database untuk siswa ini
-        const pekanMaksimal = Math.max(...data.map(item => item.pekan_ke));
-        document.getElementById('labelPekanAktif').innerText = `Pekan ke-${pekanMaksimal}`;
-        document.getElementById('filterPekan').value = pekanMaksimal;
-        loadTargetSaya();
-    }
-}
+            try {
+                const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                if (data.length > 0) {
+                    // Ambil pekan terbesar yang ada di database untuk siswa ini
+                    const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
+                    
+                    const labelPekan = document.getElementById('labelPekanAktif');
+                    if (labelPekan) {
+                        labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
+                    }
+                    
+                    document.getElementById('filterPekan').value = pekanMaksimal;
+                    loadTargetSaya();
+                } else {
+                    loadTargetSaya();
+                }
+            } catch (err) {
+                console.error("Gagal mendeteksi pekan aktif:", err);
+                loadTargetSaya();
+            }
+        }
+
+        function updateProgress(selesai, total) {
+            const progressBar = document.getElementById('progressBar');
+            const textProgres = document.getElementById('textProgres');
+            
+            if (progressBar && textProgres) {
+                const persen = total === 0 ? 0 : Math.round((selesai / total) * 100);
+                progressBar.style.width = `${persen}%`;
+                textProgres.innerText = `${selesai} dari ${total} Selesai (${persen}%)`;
+            }
+        }
 
         async function updateStatus(id, status) {
             const status_selesai = status ? 1 : 0;
@@ -106,8 +152,6 @@
             });
             loadTargetSaya();
         }
-
-        window.onload = loadTargetSaya;
     </script>
 </body>
 </html>

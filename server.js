@@ -295,15 +295,24 @@ app.post('/api/target', verifyToken, (req, res) => {
         return res.status(400).json({ error: "Data target belum lengkap!" });
     }
 
-    const sql = `INSERT INTO target_murojaah (guru_id, murid_id, pekan_ke, hari, isi_target) VALUES (?, ?, ?, ?, ?)`;
+    // Cek apakah target untuk pekan ini sudah pernah dibuat sebelumnya untuk siswa tersebut
+    const checkSql = `SELECT id FROM target_murojaah WHERE murid_id = ? AND pekan_ke = ? LIMIT 1`;
+    db.get(checkSql, [murid_id, pekan_ke], (err, row) => {
+        if (err) return res.status(500).json({ error: "Terjadi kesalahan database." });
+        if (row) {
+            return res.status(400).json({ error: `Target untuk Pekan ke-${pekan_ke} bagi siswa ini sudah pernah dibuat! Silakan gunakan menu Edit Target Lama.` });
+        }
 
-    targets.forEach(item => {
-        db.run(sql, [guru_id, murid_id, pekan_ke, item.hari, item.isi_target], (err) => {
-            if (err) console.error("Gagal simpan target:", err.message);
+        const sql = `INSERT INTO target_murojaah (guru_id, murid_id, pekan_ke, hari, isi_target) VALUES (?, ?, ?, ?, ?)`;
+
+        targets.forEach(item => {
+            db.run(sql, [guru_id, murid_id, pekan_ke, item.hari, item.isi_target], (err) => {
+                if (err) console.error("Gagal simpan target:", err.message);
+            });
         });
-    });
 
-    res.json({ message: "Alhamdulillah, Target muroja'ah berhasil dikirim ke siswa!" });
+        res.json({ message: "Alhamdulillah, Target muroja'ah berhasil dikirim ke siswa!" });
+    });
 });
 
 // Siswa atau Guru melihat daftar target berdasarkan murid & pekan
@@ -311,23 +320,17 @@ app.get('/api/target', verifyToken, (req, res) => {
     const { murid_id, pekan_ke } = req.query;
     
     let targetMuridId = req.user.role === 'murid' ? req.user.id : murid_id;
+    let sql = `SELECT * FROM target_murojaah WHERE murid_id = ?`;
+    let params = [targetMuridId];
 
-    const sql = `SELECT * FROM target_murojaah WHERE murid_id = ? AND pekan_ke = ?`;
-    db.all(sql, [targetMuridId, pekan_ke], (err, rows) => {
+    if (pekan_ke) {
+        sql += ` AND pekan_ke = ?`;
+        params.push(pekan_ke);
+    }
+
+    db.all(sql, params, (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
-    });
-});
-
-// Siswa mengubah status ceklis (selesai / belum)
-app.put('/api/target/:id/status', verifyToken, (req, res) => {
-    const targetId = req.params.id;
-    const { status_selesai } = req.body;
-
-    const sql = `UPDATE target_murojaah SET status_selesai = ? WHERE id = ?`;
-    db.run(sql, [status_selesai, targetId], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: "Status target diperbarui!" });
     });
 });
 
