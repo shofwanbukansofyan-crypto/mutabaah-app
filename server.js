@@ -9,6 +9,7 @@ const SECRET_KEY = "rahasia_zpin_123";
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 // ==========================================
 // MIDDLEWARE: Cek Token Keamanan
