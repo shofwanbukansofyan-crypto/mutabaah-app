@@ -59,6 +59,7 @@
         if (!token) { window.location.href = 'login.html'; }
 
         // Jalankan cek pekan aktif saat halaman pertama kali dibuka
+        // Jalankan saat halaman pertama kali dimuat
         window.onload = function() {
             cekPekanAktif();
         };
@@ -68,51 +69,56 @@
             const container = document.getElementById('listTarget');
             container.innerHTML = '<p class="text-center text-gray-500 italic">Memuat target...</p>';
 
-            // Mengirim query parameter pekan_ke
-            const res = await fetch(`/api/target?pekan_ke=${pekan}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
+            try {
+                // Pastikan endpoint mengirim parameter pekan_ke dengan benar
+                const res = await fetch(`/api/target?pekan_ke=${pekan}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
 
-            if (data.length === 0) {
-                container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
-                updateProgress(0, 0);
-                return;
-            }
+                if (!res.ok || data.length === 0) {
+                    container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
+                    updateProgress(0, 0);
+                    return;
+                }
 
-            let selesaiCount = 0;
-            container.innerHTML = '';
-            
-            data.forEach(item => {
-                if (item.status_selesai === 1) selesaiCount++;
-                const isChecked = item.status_selesai === 1 ? 'checked' : '';
-                const styleCoret = item.status_selesai === 1 ? 'line-through text-gray-400' : 'text-[#113f59]';
+                let selesaiCount = 0;
+                container.innerHTML = '';
+                
+                data.forEach(item => {
+                    if (Number(item.status_selesai) === 1) selesaiCount++;
+                    const isChecked = Number(item.status_selesai) === 1 ? 'checked' : '';
+                    const styleCoret = Number(item.status_selesai) === 1 ? 'line-through text-gray-400' : 'text-[#113f59]';
 
-                container.innerHTML += `
-                    <div class="flex items-center justify-between bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059] transition-all">
-                        <div class="flex items-center gap-4 flex-1">
-                            <span class="w-20 font-bold text-[#113f59]">${item.hari}</span>
-                            <span id="text-${item.id}" class="flex-1 font-semibold ${styleCoret}">${item.isi_target}</span>
+                    container.innerHTML += `
+                        <div class="flex items-center justify-between bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059] transition-all">
+                            <div class="flex items-center gap-4 flex-1">
+                                <span class="w-20 font-bold text-[#113f59]">${item.hari}</span>
+                                <span id="text-${item.id}" class="flex-1 font-semibold ${styleCoret}">${item.isi_target}</span>
+                            </div>
+                            <label class="flex items-center cursor-pointer gap-2">
+                                <span class="text-sm font-bold text-gray-600">Selesai</span>
+                                <input type="checkbox" ${isChecked} onchange="updateStatus(${item.id}, this.checked)" 
+                                    class="w-5 h-5 text-[#113f59] border-[#c5a059] rounded cursor-pointer">
+                            </label>
                         </div>
-                        <label class="flex items-center cursor-pointer gap-2">
-                            <span class="text-sm font-bold text-gray-600">Selesai</span>
-                            <input type="checkbox" ${isChecked} onchange="updateStatus(${item.id}, this.checked)" 
-                                class="w-5 h-5 text-[#113f59] border-[#c5a059] rounded cursor-pointer">
-                        </label>
-                    </div>
-                `;
-            });
+                    `;
+                });
 
-            // Update tampilan progress bar
-            updateProgress(selesaiCount, data.length);
+                updateProgress(selesaiCount, data.length);
+            } catch (err) {
+                console.error("Gagal memuat target:", err);
+                container.innerHTML = `<p class="text-center text-red-500 italic py-6">Gagal memuat data dari server.</p>`;
+            }
         }
 
         async function cekPekanAktif() {
             try {
+                // Ambil semua target milik siswa tanpa filter pekan untuk mendeteksi nilai tertinggi
                 const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
-                if (data.length > 0) {
-                    // Ambil pekan terbesar yang ada di database untuk siswa ini
+                
+                if (res.ok && data.length > 0) {
                     const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
                     
                     const labelPekan = document.getElementById('labelPekanAktif');
@@ -121,36 +127,14 @@
                     }
                     
                     document.getElementById('filterPekan').value = pekanMaksimal;
-                    loadTargetSaya();
-                } else {
-                    loadTargetSaya();
                 }
+                
+                // Panggil pemuatan target berdasarkan nilai input pekan yang aktif
+                loadTargetSaya();
             } catch (err) {
                 console.error("Gagal mendeteksi pekan aktif:", err);
                 loadTargetSaya();
             }
-        }
-
-        function updateProgress(selesai, total) {
-            const progressBar = document.getElementById('progressBar');
-            const textProgres = document.getElementById('textProgres');
-            
-            if (progressBar && textProgres) {
-                const persen = total === 0 ? 0 : Math.round((selesai / total) * 100);
-                progressBar.style.width = `${persen}%`;
-                textProgres.innerText = `${selesai} dari ${total} Selesai (${persen}%)`;
-            }
-        }
-
-        async function updateStatus(id, status) {
-            const status_selesai = status ? 1 : 0;
-            // Menggunakan endpoint /api/target/:id/status sesuai server.js
-            await fetch(`/api/target/${id}/status`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ status_selesai })
-            });
-            loadTargetSaya();
         }
     </script>
 </body>
