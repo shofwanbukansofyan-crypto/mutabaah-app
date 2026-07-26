@@ -85,7 +85,7 @@
         async function loadDataRekapan() {
             try {
                 // Minta data ke server, jangan lupa bawa "kunci" tokennya
-                const response = await fetch('http://localhost:3000/api/rekapan', {
+                const response = await fetch('/api/rekapan', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
