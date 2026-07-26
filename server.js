@@ -490,3 +490,54 @@ app.post('/api/ujian/nilai/:id', verifyToken, (req, res) => {
         res.json({ message: "Penilaian ujian berhasil disimpan!", nilai_akhir: nilai_akhir.toFixed(2) });
     });
 });
+
+// Endpoint Guru menyimpan nilai dan menyelesaikan ujian
+app.post('/api/ujian/nilai/:id', verifyToken, (req, res) => {
+    if (req.user.role !== 'guru') return res.status(403).json({ error: "Khusus akses guru!" });
+
+    const { nilai_hifdz, nilai_tajwid, nilai_tartil } = req.body;
+    const nilai_akhir = (Number(nilai_hifdz) + Number(nilai_tajwid) + Number(nilai_tartil)) / 3;
+
+    // Ubah status_ujian menjadi 'selesai'
+    const sql = `UPDATE ujian_kenaikan SET nilai_hifdz = ?, nilai_tajwid = ?, nilai_tartil = ?, nilai_akhir = ?, status_ujian = 'selesai' WHERE id = ?`;
+    
+    db.run(sql, [nilai_hifdz, nilai_tajwid, nilai_tartil, nilai_akhir, req.params.id], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Ujian berhasil diselesaikan dan dinilai!", nilai_akhir: nilai_akhir.toFixed(2) });
+    });
+});
+
+// Endpoint untuk mengambil Riwayat Ujian Kenaikan Juz yang sudah selesai
+app.get('/api/ujian/riwayat', verifyToken, (req, res) => {
+    const murid_id = req.user.role === 'murid' ? req.user.id : req.query.murid_id;
+    
+    let sql = `SELECT u.*, m.nama_lengkap as nama_santri FROM ujian_kenaikan u 
+               JOIN users m ON u.murid_id = m.id 
+               WHERE u.status_ujian = 'selesai'`;
+    
+    const params = [];
+    if (murid_id) {
+        sql += ` AND u.murid_id = ?`;
+        params.push(murid_id);
+    }
+    sql += ` ORDER BY u.id DESC`;
+
+    db.all(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// Endpoint untuk melihat detail riwayat ujian tertentu berdasarkan ID Ujian
+app.get('/api/ujian/detail/:id', verifyToken, (req, res) => {
+    const ujian_id = req.params.id;
+    
+    db.get(`SELECT u.*, m.nama_lengkap as nama_santri FROM ujian_kenaikan u JOIN users m ON u.murid_id = m.id WHERE u.id = ?`, [ujian_id], (err, ujian) => {
+        if (err || !ujian) return res.status(404).json({ error: "Ujian tidak ditemukan." });
+
+        db.all(`SELECT * FROM kertas_tasmi WHERE ujian_id = ? ORDER BY nomor ASC`, [ujian_id], (err, tasmi) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ ujian, tasmi });
+        });
+    });
+});

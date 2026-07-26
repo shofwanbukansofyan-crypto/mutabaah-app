@@ -19,14 +19,12 @@
 
     <div class="max-w-5xl mx-auto bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
         
-        <!-- Header Navigasi -->
         <div class="flex justify-between items-center mb-6 border-b-2 border-[#c5a059] pb-4">
             <a href="menu-utama.html" class="text-[#113f59] font-bold hover:underline">&larr; Menu Utama</a>
             <h1 class="text-2xl font-bold text-[#113f59]">Ujian Kenaikan Juz</h1>
             <div class="w-24"></div>
         </div>
 
-        <!-- PANEL GURU: Pilih Santri & Mulai Ujian -->
         <div id="panelGuru" class="hidden mb-6 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
             <h2 class="font-bold text-[#113f59] mb-3">Panel Pengaturan Ujian (Muhaffidz)</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -46,23 +44,21 @@
             </div>
         </div>
 
-        <!-- PANEL INFORMASI & DURASI (Santri & Guru) -->
-        <div id="panelUjianAktif" class="hidden space-y-6">
+        <div id="panelUjianAktif" class="hidden space-y-6 mb-10">
             
             <div class="flex flex-col md:flex-row justify-between items-center bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059]">
                 <div>
-                    <p class="font-bold text-[#113f59]">Status Ujian: <span id="labelStatus" class="text-green-600 uppercase font-bold">Persiapan</span></p>
+                    <p class="font-bold text-[#113f59]">Status Ujian: <span id="labelStatus" class="text-green-600 uppercase font-bold">-</span></p>
                     <p class="text-sm text-gray-700 mt-1">Daftar Juz yang Diuji: <span id="labelDaftarJuz" class="font-bold text-[#c5a059]">-</span></p>
                 </div>
                 <div class="mt-3 md:mt-0 text-center bg-white px-4 py-2 rounded border border-[#c5a059] shadow-inner">
-                    <span class="text-xs font-bold text-gray-500 block">Durasi Persiapan Berjalan:</span>
+                    <span class="text-xs font-bold text-gray-500 block">Durasi Ujian:</span>
                     <span id="timerText" class="text-xl font-bold text-[#113f59]">00:00:00</span>
                 </div>
             </div>
 
-            <!-- KERTAS TASMI' (Tabel Utama) -->
             <div class="bg-white p-4 rounded-lg border border-[#c5a059] overflow-x-auto">
-                <h3 class="font-bold text-[#113f59] mb-3 text-lg" id="judulKertasTasmi">Kertas Tasmi' Ujian</h3>
+                <h3 class="font-bold text-[#113f59] mb-3 text-lg">Kertas Tasmi' Ujian</h3>
                 <table class="w-full border-collapse border border-[#c5a059] text-center bg-white text-sm">
                     <thead>
                         <tr class="bg-[#113f59] text-white">
@@ -75,12 +71,10 @@
                         </tr>
                     </thead>
                     <tbody id="tabelKertasTasmi">
-                        <!-- Baris dirender dinamis -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
 
-            <!-- PANEL PENILAIAN AKHIR (Hanya untuk Guru) -->
             <div id="panelNilaiGuru" class="hidden bg-[#fdfbf7] p-5 rounded-lg border-2 border-[#c5a059]">
                 <h3 class="font-bold text-[#113f59] text-lg mb-3">Form Penilaian Akhir Ujian (Muhaffidz)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -98,7 +92,7 @@
                     </div>
                 </div>
                 <div class="flex justify-between items-center bg-white p-3 rounded border border-[#c5a059]">
-                    <span class="font-bold text-[#113f59]">Hasil Akhir (Rata-rata Hifdz + Tajwid + Tartil / 3): <span id="previewNilaiAkhir" class="text-green-600 text-lg">-</span></span>
+                    <span class="font-bold text-[#113f59]">Hasil Akhir (Rata-rata): <span id="previewNilaiAkhir" class="text-green-600 text-lg">-</span></span>
                     <button onclick="simpanNilaiUjian()" class="bg-[#113f59] text-white font-bold px-6 py-2 rounded shadow hover:bg-[#0c2d40]">
                         Simpan Penilaian & Selesaikan Ujian
                     </button>
@@ -107,11 +101,37 @@
 
         </div>
 
-        <!-- Pesan Jika Belum Ada Ujian Aktif -->
-        <div id="pesanBelumAdaUjian" class="text-center py-12 text-gray-500 italic">
-            Belum ada sesi Ujian Kenaikan Juz yang diaktifkan.
+        <div class="bg-white p-5 rounded-lg border border-[#c5a059] mt-6">
+            <h3 class="font-bold text-[#113f59] text-lg mb-4">Riwayat Ujian Kenaikan Juz Selesai</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border border-[#c5a059] text-center text-sm">
+                    <thead>
+                        <tr class="bg-[#113f59] text-white">
+                            <th class="border border-[#c5a059] p-2">No</th>
+                            <th class="border border-[#c5a059] p-2">Nama Santri</th>
+                            <th class="border border-[#c5a059] p-2">Jumlah Juz</th>
+                            <th class="border border-[#c5a059] p-2">Nilai Akhir</th>
+                            <th class="border border-[#c5a059] p-2">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelRiwayatUjian">
+                        <tr><td colspan="5" class="p-4 text-gray-500 italic">Memuat riwayat...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
+    </div>
+
+    <div id="modalDetail" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-2xl w-full p-6 rounded-xl border-2 border-[#c5a059] max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-bold text-xl text-[#113f59]">Detail Hasil Ujian Kenaikan Juz</h3>
+                <button onclick="tutupModalDetail()" class="text-red-500 font-bold text-lg">&times; Tutup</button>
+            </div>
+            <div id="kontenDetailModal" class="space-y-4 text-sm">
+                </div>
+        </div>
     </div>
 
     <script>
@@ -126,14 +146,13 @@
             if (role === 'guru') {
                 document.getElementById('panelGuru').classList.remove('hidden');
                 loadDaftarSantri();
-                // Guru bisa pilih santri untuk dipantau
                 document.getElementById('selectMuridGuru').addEventListener('change', function() {
                     loadUjianAktif(this.value);
                 });
             } else {
-                // Santri langsung muat ujian miliknya sendiri
                 loadUjianAktif();
             }
+            loadRiwayatUjian();
         };
 
         async function loadDaftarSantri() {
@@ -149,101 +168,82 @@
         async function mulaiUjianBaru() {
             const murid_id = document.getElementById('selectMuridGuru').value;
             const jumlah_juz = parseInt(document.getElementById('inputJumlahJuz').value);
-
             if (!murid_id) { alert('Pilih santri terlebih dahulu!'); return; }
 
-            // Buat urutan daftar juz otomatis (contoh: 5 juz -> [1,2,3,4,5])
             const daftar_juz = [];
-            for (let i = 1; i <= jumlah_juz; i++) {
-                daftar_juz.push(i);
-            }
+            for (let i = 1; i <= jumlah_juz; i++) { daftar_juz.push(i); }
 
-            try {
-                const res = await fetch('/api/ujian/mulai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ murid_id, jumlah_juz, daftar_juz })
-                });
-                const result = await res.json();
-                if (res.ok) {
-                    alert(result.message);
-                    loadUjianAktif(murid_id);
-                } else {
-                    alert('Gagal: ' + result.error);
-                }
-            } catch (err) {
-                alert('Kesalahan jaringan.');
+            const res = await fetch('/api/ujian/mulai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ murid_id, jumlah_juz, daftar_juz })
+            });
+            const result = await res.json();
+            if (res.ok) {
+                alert(result.message);
+                loadUjianAktif(murid_id);
+            } else {
+                alert('Gagal: ' + result.error);
             }
         }
 
         async function loadUjianAktif(muridIdQuery = '') {
             const url = muridIdQuery ? `/api/ujian/aktif?murid_id=${muridIdQuery}` : `/api/ujian/aktif`;
-            try {
-                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await res.json();
+            const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
 
-                const panelUjian = document.getElementById('panelUjianAktif');
-                const pesanKosong = document.getElementById('pesanBelumAdaUjian');
+            const panelUjian = document.getElementById('panelUjianAktif');
 
-                if (data.aktif) {
-                    activeUjianId = data.ujian.id;
-                    panelUjian.classList.remove('hidden');
-                    pesanKosong.classList.add('hidden');
+            if (data.aktif && data.ujian.status_ujian === 'persiapan') {
+                activeUjianId = data.ujian.id;
+                panelUjian.classList.remove('hidden');
 
-                    document.getElementById('labelStatus').innerText = data.ujian.status_ujian;
-                    
-                    const listJuz = JSON.parse(data.ujian.daftar_juz || '[]');
-                    document.getElementById('labelDaftarJuz').innerText = `Juz (${listJuz.join(', ')})`;
+                document.getElementById('labelStatus').innerText = data.ujian.status_ujian;
+                const listJuz = JSON.parse(data.ujian.daftar_juz || '[]');
+                document.getElementById('labelDaftarJuz').innerText = `Juz (${listJuz.join(', ')})`;
 
-                    // Jalankan Timer durasi
-                    mulaiTimer(new Date(data.ujian.waktu_mulai));
+                // Mulai Timer Durasi
+                mulaiTimer(new Date(data.ujian.waktu_mulai));
 
-                    // Render Tabel Kertas Tasmi'
-                    const tbody = document.getElementById('tabelKertasTasmi');
-                    tbody.innerHTML = '';
+                const tbody = document.getElementById('tabelKertasTasmi');
+                tbody.innerHTML = '';
+                data.tasmi.forEach(row => {
+                    const isReadonly = role === 'guru' ? 'disabled' : '';
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-[#f0ebd8]/40">
+                            <td class="border border-[#c5a059] p-2 font-bold">${row.nomor}</td>
+                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.tanbih}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded tanbih bg-transparent"></td>
+                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.khoto}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded khoto bg-transparent"></td>
+                            <td class="border border-[#c5a059] p-1">
+                                <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="taqdir border rounded p-1 bg-transparent w-full">
+                                    <option value="">- Pilih -</option>
+                                    <option value="mumtaz" ${row.taqdir==='mumtaz'?'selected':''}>Mumtaz</option>
+                                    <option value="jayyid_jiddan" ${row.taqdir==='jayyid_jiddan'?'selected':''}>Jayyid Jiddan</option>
+                                    <option value="jayyid" ${row.taqdir==='jayyid'?'selected':''}>Jayyid</option>
+                                </select>
+                            </td>
+                            <td class="border border-[#c5a059] p-1">
+                                <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="status border rounded p-1 bg-transparent w-full">
+                                    <option value="">- Pilih -</option>
+                                    <option value="maqbul" ${row.status_kelulusan==='maqbul'?'selected':''}>Maqbul</option>
+                                    <option value="mardud" ${row.status_kelulusan==='mardud'?'selected':''}>Mardud</option>
+                                </select>
+                            </td>
+                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} value="${row.mustami || ''}" onchange="updateTasmi(${row.id}, this)" class="w-full border rounded px-2 mustami bg-transparent" placeholder="Nama penyimak"></td>
+                        </tr>
+                    `;
+                });
 
-                    data.tasmi.forEach(row => {
-                        const isReadonly = role === 'guru' ? 'disabled' : '';
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-[#f0ebd8]/40">
-                                <td class="border border-[#c5a059] p-2 font-bold">${row.nomor}</td>
-                                <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.tanbih}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded tanbih bg-transparent"></td>
-                                <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.khoto}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded khoto bg-transparent"></td>
-                                <td class="border border-[#c5a059] p-1">
-                                    <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="taqdir border rounded p-1 bg-transparent w-full">
-                                        <option value="">- Pilih Taqdir -</option>
-                                        <option value="mumtaz" ${row.taqdir==='mumtaz'?'selected':''}>Mumtaz</option>
-                                        <option value="jayyid_jiddan" ${row.taqdir==='jayyid_jiddan'?'selected':''}>Jayyid Jiddan</option>
-                                        <option value="jayyid" ${row.taqdir==='jayyid'?'selected':''}>Jayyid</option>
-                                    </select>
-                                </td>
-                                <td class="border border-[#c5a059] p-1">
-                                    <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="status border rounded p-1 bg-transparent w-full">
-                                        <option value="">- Pilih -</option>
-                                        <option value="maqbul" ${row.status_kelulusan==='maqbul'?'selected':''}>Maqbul</option>
-                                        <option value="mardud" ${row.status_kelulusan==='mardud'?'selected':''}>Mardud</option>
-                                    </select>
-                                </td>
-                                <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} value="${row.mustami || ''}" onchange="updateTasmi(${row.id}, this)" class="w-full border rounded px-2 mustami bg-transparent" placeholder="Nama penyimak"></td>
-                            </tr>
-                        `;
-                    });
-
-                    // Jika yang login guru, tampilkan panel penilaian akhir
-                    if (role === 'guru') {
-                        document.getElementById('panelNilaiGuru').classList.remove('hidden');
-                        document.getElementById('inputHifdz').value = data.ujian.nilai_hifdz || '';
-                        document.getElementById('inputTajwid').value = data.ujian.nilai_tajwid || '';
-                        document.getElementById('inputTartil').value = data.ujian.nilai_tartil || '';
-                        document.getElementById('previewNilaiAkhir').innerText = data.ujian.nilai_akhir || '-';
-                    }
-
-                } else {
-                    panelUjian.classList.add('hidden');
-                    pesanKosong.classList.remove('hidden');
+                if (role === 'guru') {
+                    document.getElementById('panelNilaiGuru').classList.remove('hidden');
+                    document.getElementById('inputHifdz').value = data.ujian.nilai_hifdz || '';
+                    document.getElementById('inputTajwid').value = data.ujian.nilai_tajwid || '';
+                    document.getElementById('inputTartil').value = data.ujian.nilai_tartil || '';
+                    document.getElementById('previewNilaiAkhir').innerText = data.ujian.nilai_akhir || '-';
                 }
-            } catch (err) {
-                console.error(err);
+            } else {
+                panelUjian.classList.add('hidden');
+                if (timerInterval) clearInterval(timerInterval);
             }
         }
 
@@ -260,7 +260,7 @@
         }
 
         async function updateTasmi(id, element) {
-            if (role === 'guru') return; // Guru hanya membaca
+            if (role === 'guru') return;
             const tr = element.closest('tr');
             const body = {
                 tanbih: tr.querySelector('.tanbih').value,
@@ -282,22 +282,92 @@
             const tajwid = document.getElementById('inputTajwid').value;
             const tartil = document.getElementById('inputTartil').value;
 
-            try {
-                const res = await fetch(`/api/ujian/nilai/${activeUjianId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ nilai_hifdz: hifdz, nilai_tajwid: tajwid, nilai_tartil: tartil })
-                });
-                const result = await res.json();
-                if (res.ok) {
-                    alert(result.message);
-                    document.getElementById('previewNilaiAkhir').innerText = result.nilai_akhir;
-                } else {
-                    alert('Gagal: ' + result.error);
-                }
-            } catch (err) {
-                alert('Kesalahan jaringan.');
+            const res = await fetch(`/api/ujian/nilai/${activeUjianId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ nilai_hifdz: hifdz, nilai_tajwid: tajwid, nilai_tartil: tartil })
+            });
+            const result = await res.json();
+            if (res.ok) {
+                alert(result.message);
+                if (timerInterval) clearInterval(timerInterval); // Hentikan durasi
+                window.location.reload(); // Refresh halaman otomatis
+            } else {
+                alert('Gagal: ' + result.error);
             }
+        }
+
+        async function loadRiwayatUjian() {
+            const queryUrl = role === 'guru' ? '/api/ujian/riwayat' : `/api/ujian/riwayat`;
+            const res = await fetch(queryUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+
+            const tbody = document.getElementById('tabelRiwayatUjian');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-gray-500 italic">Belum ada riwayat ujian selesai.</td></tr>`;
+                return;
+            }
+
+            data.forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-[#f0ebd8]/40 border-b">
+                        <td class="p-2 border">${index + 1}</td>
+                        <td class="p-2 border font-bold text-[#113f59]">${item.nama_santri}</td>
+                        <td class="p-2 border">${item.jumlah_juz} Juz</td>
+                        <td class="p-2 border font-bold text-green-600">${item.nilai_akhir ? Number(item.nilai_akhir).toFixed(2) : '-'}</td>
+                        <td class="p-2 border">
+                            <button onclick="lihatDetailUjian(${item.id})" class="bg-[#113f59] text-white px-3 py-1 rounded text-xs font-bold hover:bg-[#0c2d40]">Lihat</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function lihatDetailUjian(id) {
+            const res = await fetch(`/api/ujian/detail/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+
+            if (res.ok) {
+                const u = data.ujian;
+                let html = `
+                    <p><strong>Nama Santri:</strong> ${u.nama_santri}</p>
+                    <p><strong>Jumlah Juz:</strong> ${u.jumlah_juz} Juz</p>
+                    <p><strong>Nilai Hifdz:</strong> ${u.nilai_hifdz} | <strong>Tajwid:</strong> ${u.nilai_tajwid} | <strong>Tartil:</strong> ${u.nilai_tartil}</p>
+                    <p><strong>Nilai Akhir (Rata-rata):</strong> <span class="text-green-600 font-bold">${Number(u.nilai_akhir).toFixed(2)}</span></p>
+                    <hr class="my-2">
+                    <h4 class="font-bold text-[#113f59]">Kertas Tasmi' Selesai:</h4>
+                    <table class="w-full border-collapse border text-center text-xs mt-2">
+                        <tr class="bg-[#113f59] text-white">
+                            <th class="border p-1">No</th>
+                            <th class="border p-1">Tanbih</th>
+                            <th class="border p-1">Khoto'</th>
+                            <th class="border p-1">Taqdir</th>
+                            <th class="border p-1">Maqbul/Mardud</th>
+                            <th class="border p-1">Mustami'</th>
+                        </tr>
+                `;
+                data.tasmi.forEach(t => {
+                    html += `
+                        <tr>
+                            <td class="border p-1">${t.nomor}</td>
+                            <td class="border p-1">${t.tanbih}</td>
+                            <td class="border p-1">${t.khoto}</td>
+                            <td class="border p-1">${t.taqdir || '-'}</td>
+                            <td class="border p-1">${t.status_kelulusan || '-'}</td>
+                            <td class="border p-1">${t.mustami || '-'}</td>
+                        </tr>
+                    `;
+                });
+                html += `</table>`;
+                document.getElementById('kontenDetailModal').innerHTML = html;
+                document.getElementById('modalDetail').classList.remove('hidden');
+            }
+        }
+
+        function tutupModalDetail() {
+            document.getElementById('modalDetail').classList.add('hidden');
         }
     </script>
 </body>
