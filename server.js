@@ -129,7 +129,13 @@ app.get('/api/rekapan', verifyToken, (req, res) => {
 app.get('/api/rekapan/:id', verifyToken, (req, res) => {
     const id = req.params.id;
 
-    const sqlMingguan = `SELECT * FROM rekapan_mingguan WHERE id = ?`;
+    // Ambil data mingguan digabung dengan nama lengkap siswa dari tabel users
+    const sqlMingguan = `
+        SELECT rm.*, u.nama_lengkap AS nama_murid 
+        FROM rekapan_mingguan rm 
+        JOIN users u ON rm.murid_id = u.id 
+        WHERE rm.id = ?
+    `;
     const sqlHarian = `SELECT * FROM rekapan_harian WHERE rekapan_mingguan_id = ?`;
 
     db.get(sqlMingguan, [id], (err, mingguan) => {

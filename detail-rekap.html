@@ -19,13 +19,17 @@
 
     <div class="max-w-6xl mx-auto bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
         
-        <div class="flex justify-between items-start mb-8 pb-4 border-b-2 border-[#c5a059]">
+        <div class="flex justify-between items-start mb-6 pb-4 border-b-2 border-[#c5a059]">
             <a href="daftar-rekap.html" class="text-[#113f59] font-bold hover:underline flex items-center gap-1">
                 &larr; Kembali
             </a>
             <div class="text-center flex-1">
-                <div class="inline-block bg-[#113f59] text-white px-10 py-2 rounded-[2rem] shadow-md border-2 border-[#c5a059] mb-4">
+                <div class="inline-block bg-[#113f59] text-white px-10 py-2 rounded-[2rem] shadow-md border-2 border-[#c5a059] mb-3">
                     <h1 id="judulHalaman" class="text-2xl font-bold">Detail Mutaba'ah Mingguan</h1>
+                </div>
+
+                <div class="mb-3 text-[#113f59] font-bold text-lg">
+                    <span>Siswa : </span><span id="viewNamaSiswa" class="text-[#c5a059] text-xl">-</span>
                 </div>
                 
                 <div class="flex flex-col md:flex-row justify-center gap-6 text-[#113f59] font-bold text-lg" dir="rtl">
@@ -109,6 +113,9 @@
                     const m = data.mingguan;
                     dataGlobalHarian = data.harian;
 
+                    // Tampilkan Nama Siswa
+                    document.getElementById('viewNamaSiswa').innerText = m.nama_murid || 'Siswa';
+
                     if (role === 'guru') {
                         document.getElementById('judulHalaman').innerText = "Edit Mutaba'ah Mingguan";
                         
@@ -187,7 +194,6 @@
         }
 
         if (role === 'guru') {
-            // Aksi Simpan Perubahan
             document.getElementById('btnSimpanEdit').addEventListener('click', async () => {
                 const pekan_ke = document.getElementById('editPekan').value;
                 const tanggal_mulai = document.getElementById('editTanggal').value;
@@ -227,9 +233,8 @@
                 }
             });
 
-            // Aksi Hapus Rekapan
             document.getElementById('btnHapusRekapan').addEventListener('click', async () => {
-                const konfirmasi = confirm("Yakin ingin menghapus rekapan mingguan ini? Data yang dihapus tidak bisa dikembalikan.");
+                const konfirmasi = confirm("Yakin ingin menghapus rekapan mingguan ini?");
                 if (!konfirmasi) return;
 
                 try {
