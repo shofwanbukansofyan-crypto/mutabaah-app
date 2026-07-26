@@ -237,3 +237,7 @@ app.put('/api/target/:id/edit', verifyToken, (req, res) => {
         res.json({ message: "Perubahan target berhasil disimpan!" });
     });
 });
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/login.html');
+});
