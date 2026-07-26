@@ -147,24 +147,24 @@
             }
         }
 
-        async function cekPekanAktif() {
+       async function cekPekanAktif() {
             try {
-                // Ambil semua target milik siswa tanpa filter pekan untuk mendeteksi nilai tertinggi
                 const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await res.json();
-                
-                if (res.ok && data.length > 0) {
-                    const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
-                    
-                    const labelPekan = document.getElementById('labelPekanAktif');
-                    if (labelPekan) {
-                        labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
+                        
+                        // Perbarui teks pada badge pekan aktif
+                        const labelPekan = document.getElementById('labelPekanAktif');
+                        if (labelPekan) {
+                            labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
+                        }
+                        
+                        // Perbarui nilai input filter pekan
+                        document.getElementById('filterPekan').value = pekanMaksimal;
                     }
-                    
-                    document.getElementById('filterPekan').value = pekanMaksimal;
                 }
-                
-                // Panggil pemuatan target berdasarkan nilai input pekan yang aktif
                 loadTargetSaya();
             } catch (err) {
                 console.error("Gagal mendeteksi pekan aktif:", err);
