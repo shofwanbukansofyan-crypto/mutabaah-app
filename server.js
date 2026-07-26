@@ -99,30 +99,51 @@ app.post('/api/rekapan', verifyToken, (req, res) => {
 
     if (!murid_id) return res.status(400).json({ error: "Silakan pilih murid terlebih dahulu!" });
 
-    // Cek apakah rekapan untuk pekan ini sudah ada sebelumnya bagi siswa tersebut
-    const checkSql = `SELECT id FROM rekapan_mingguan WHERE murid_id = ? AND pekan_ke = ?`;
-    db.get(checkSql, [murid_id, pekan_ke], (err, row) => {
+    // 1. Cek apakah Pekan ke- yang sama sudah pernah dibuat
+    const checkPekanSql = `SELECT id FROM rekapan_mingguan WHERE murid_id = ? AND pekan_ke = ?`;
+    db.get(checkPekanSql, [murid_id, pekan_ke], (err, rowPekan) => {
         if (err) return res.status(500).json({ error: "Terjadi kesalahan database." });
-        if (row) {
+        if (rowPekan) {
             return res.status(400).json({ error: `Rekapan untuk Pekan ke-${pekan_ke} bagi siswa ini sudah pernah dibuat sebelumnya!` });
         }
 
-        // Jika belum ada, lanjutkan proses simpan
-        const sqlMingguan = `INSERT INTO rekapan_mingguan (murid_id, guru_id, pekan_ke, tanggal_mulai, pencapaian_terbaik, catatan_umum) VALUES (?, ?, ?, ?, ?, ?)`;
+        // 2. Cek apakah tanggal mulai yang diinput sudah pernah dipakai di rekapan lain 
+        // atau berdekatan dalam rentang 7 hari (agar tanggal tidak tumpang tindih)
+        const checkTanggalSql = `SELECT pekan_ke, tanggal_mulai FROM rekapan_mingguan WHERE murid_id = ?`;
+        db.all(checkTanggalSql, [murid_id], (err, rowsRekapan) => {
+            if (err) return res.status(500).json({ error: "Terjadi kesalahan database saat cek tanggal." });
 
-        db.run(sqlMingguan, [murid_id, guru_id, pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum], function(err) {
-            if (err) return res.status(500).json({ error: "Gagal menyimpan data mingguan: " + err.message });
+            const tglBaru = new Date(tanggal_mulai).getTime();
 
-            const id_mingguan = this.lastID;
-            const sqlHarian = `INSERT INTO rekapan_harian (rekapan_mingguan_id, hari, hafalan_surah_ayat, nilai_hafalan, murojaah_surah_ayat, nilai_murojaah, catatan_harian) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            for (let rek of rowsRekapan) {
+                const tglLama = new Date(rek.tanggal_mulai).getTime();
+                const selisihHari = Math.abs(tglBaru - tglLama) / (1000 * 60 * 60 * 24);
 
-            data_harian.forEach(hari => {
-                db.run(sqlHarian, [id_mingguan, hari.nama_hari, hari.hafalan, hari.nilai_hafalan, hari.murojaah, hari.nilai_murojaah, hari.catatan], (err) => {
-                    if (err) console.error("Gagal simpan data harian:", err.message);
+                // Jika jarak tanggal mulai kurang dari 7 hari dari rekapan pekan lain, anggap bentrok
+                if (selisihHari < 7) {
+                    return res.status(400).json({ 
+                        error: `Tanggal mulai bentrok! Tanggal ini terlalu dekat dengan Pekan ke-${rek.pekan_ke} (${rek.tanggal_mulai}). Satu pekan minimal berjarak 7 hari.` 
+                    });
+                }
+            }
+
+            // Jika aman dari duplikasi pekan dan bentrok tanggal, lanjutkan simpan
+            const sqlMingguan = `INSERT INTO rekapan_mingguan (murid_id, guru_id, pekan_ke, tanggal_mulai, pencapaian_terbaik, catatan_umum) VALUES (?, ?, ?, ?, ?, ?)`;
+
+            db.run(sqlMingguan, [murid_id, guru_id, pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum], function(err) {
+                if (err) return res.status(500).json({ error: "Gagal menyimpan data mingguan: " + err.message });
+
+                const id_mingguan = this.lastID;
+                const sqlHarian = `INSERT INTO rekapan_harian (rekapan_mingguan_id, hari, hafalan_surah_ayat, nilai_hafalan, murojaah_surah_ayat, nilai_murojaah, catatan_harian) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+                data_harian.forEach(hari => {
+                    db.run(sqlHarian, [id_mingguan, hari.nama_hari, hari.hafalan, hari.nilai_hafalan, hari.murojaah, hari.nilai_murojaah, hari.catatan], (err) => {
+                        if (err) console.error("Gagal simpan data harian:", err.message);
+                    });
                 });
-            });
 
-            res.json({ message: "Alhamdulillah, Data rekapan berhasil disimpan!" });
+                res.json({ message: "Alhamdulillah, Data rekapan berhasil disimpan!" });
+            });
         });
     });
 });
