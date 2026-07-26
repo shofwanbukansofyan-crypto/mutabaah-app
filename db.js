@@ -74,4 +74,34 @@ db.serialize(() => {
     console.log('Skema tabel lengkap dan data testing berhasil disiapkan.');
 });
 
+// Tabel Sesi Ujian Kenaikan Juz
+db.run(`CREATE TABLE IF NOT EXISTS ujian_kenaikan (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    murid_id INTEGER,
+    guru_id INTEGER,
+    jumlah_juz INTEGER,
+    daftar_juz TEXT, -- Disimpan format JSON, contoh: "[1,2,3,4,5]"
+    waktu_mulai DATETIME,
+    status_ujian 'persiapan' | 'berlangsung' | 'selesai',
+    nilai_hifdz REAL DEFAULT 0,
+    nilai_tajwid REAL DEFAULT 0,
+    nilai_tartil REAL DEFAULT 0,
+    nilai_akhir REAL DEFAULT 0,
+    FOREIGN KEY(murid_id) REFERENCES users(id),
+    FOREIGN KEY(guru_id) REFERENCES users(id)
+)`);
+
+// Tabel Kertas Tasmi' (Baris disesuaikan dengan jumlah juz + 5 baris ekstra)
+db.run(`CREATE TABLE IF NOT EXISTS kertas_tasmi (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ujian_id INTEGER,
+    nomor INTEGER,
+    tanbih INTEGER DEFAULT 0,
+    khoto INTEGER DEFAULT 0,
+    taqdir TEXT,       -- 'mumtaz', 'jayyid_jiddan', 'jayyid'
+    status_kelulusan TEXT, -- 'maqbul', 'mardud'
+    mustami TEXT,      -- Teks input nama penyimak
+    FOREIGN KEY(ujian_id) REFERENCES ujian_kenaikan(id)
+)`);
+
 module.exports = db;

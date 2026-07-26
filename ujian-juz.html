@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Kenaikan Juz - Sistem Mutaba'ah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #fdfbf7;
+            background-image: 
+                linear-gradient(30deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8),
+                linear-gradient(150deg, #f0ebd8 12%, transparent 12.5%, transparent 87%, #f0ebd8 87.5%, #f0ebd8);
+            background-size: 40px 70px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-serif">
+
+    <div class="max-w-5xl mx-auto bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
+        
+        <!-- Header Navigasi -->
+        <div class="flex justify-between items-center mb-6 border-b-2 border-[#c5a059] pb-4">
+            <a href="menu-utama.html" class="text-[#113f59] font-bold hover:underline">&larr; Menu Utama</a>
+            <h1 class="text-2xl font-bold text-[#113f59]">Ujian Kenaikan Juz</h1>
+            <div class="w-24"></div>
+        </div>
+
+        <!-- PANEL GURU: Pilih Santri & Mulai Ujian -->
+        <div id="panelGuru" class="hidden mb-6 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
+            <h2 class="font-bold text-[#113f59] mb-3">Panel Pengaturan Ujian (Muhaffidz)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label class="block font-bold text-sm text-[#113f59] mb-1">Pilih Santri:</label>
+                    <select id="selectMuridGuru" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white outline-none">
+                        <option value="" disabled selected>- Pilih Santri -</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-sm text-[#113f59] mb-1">Jumlah Juz Ujian:</label>
+                    <input type="number" id="inputJumlahJuz" value="3" min="1" max="30" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold">
+                </div>
+                <button onclick="mulaiUjianBaru()" class="bg-[#113f59] text-white font-bold px-4 py-2 rounded shadow hover:bg-[#0c2d40] border border-[#c5a059]">
+                    Aktifkan Ujian & Durasi
+                </button>
+            </div>
+        </div>
+
+        <!-- PANEL INFORMASI & DURASI (Santri & Guru) -->
+        <div id="panelUjianAktif" class="hidden space-y-6">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059]">
+                <div>
+                    <p class="font-bold text-[#113f59]">Status Ujian: <span id="labelStatus" class="text-green-600 uppercase font-bold">Persiapan</span></p>
+                    <p class="text-sm text-gray-700 mt-1">Daftar Juz yang Diuji: <span id="labelDaftarJuz" class="font-bold text-[#c5a059]">-</span></p>
+                </div>
+                <div class="mt-3 md:mt-0 text-center bg-white px-4 py-2 rounded border border-[#c5a059] shadow-inner">
+                    <span class="text-xs font-bold text-gray-500 block">Durasi Persiapan Berjalan:</span>
+                    <span id="timerText" class="text-xl font-bold text-[#113f59]">00:00:00</span>
+                </div>
+            </div>
+
+            <!-- KERTAS TASMI' (Tabel Utama) -->
+            <div class="bg-white p-4 rounded-lg border border-[#c5a059] overflow-x-auto">
+                <h3 class="font-bold text-[#113f59] mb-3 text-lg" id="judulKertasTasmi">Kertas Tasmi' Ujian</h3>
+                <table class="w-full border-collapse border border-[#c5a059] text-center bg-white text-sm">
+                    <thead>
+                        <tr class="bg-[#113f59] text-white">
+                            <th class="border border-[#c5a059] p-2">No</th>
+                            <th class="border border-[#c5a059] p-2">Tanbih</th>
+                            <th class="border border-[#c5a059] p-2">Khoto'</th>
+                            <th class="border border-[#c5a059] p-2">Taqdir</th>
+                            <th class="border border-[#c5a059] p-2">Maqbul / Mardud</th>
+                            <th class="border border-[#c5a059] p-2">Mustami'</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelKertasTasmi">
+                        <!-- Baris dirender dinamis -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PANEL PENILAIAN AKHIR (Hanya untuk Guru) -->
+            <div id="panelNilaiGuru" class="hidden bg-[#fdfbf7] p-5 rounded-lg border-2 border-[#c5a059]">
+                <h3 class="font-bold text-[#113f59] text-lg mb-3">Form Penilaian Akhir Ujian (Muhaffidz)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block font-bold text-sm text-[#113f59] mb-1">Nilai Hifdz (0-100):</label>
+                        <input type="number" id="inputHifdz" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-sm text-[#113f59] mb-1">Nilai Tajwid (0-100):</label>
+                        <input type="number" id="inputTajwid" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-sm text-[#113f59] mb-1">Nilai Tartil (0-100):</label>
+                        <input type="number" id="inputTartil" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center bg-white p-3 rounded border border-[#c5a059]">
+                    <span class="font-bold text-[#113f59]">Hasil Akhir (Rata-rata Hifdz + Tajwid + Tartil / 3): <span id="previewNilaiAkhir" class="text-green-600 text-lg">-</span></span>
+                    <button onclick="simpanNilaiUjian()" class="bg-[#113f59] text-white font-bold px-6 py-2 rounded shadow hover:bg-[#0c2d40]">
+                        Simpan Penilaian & Selesaikan Ujian
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Pesan Jika Belum Ada Ujian Aktif -->
+        <div id="pesanBelumAdaUjian" class="text-center py-12 text-gray-500 italic">
+            Belum ada sesi Ujian Kenaikan Juz yang diaktifkan.
+        </div>
+
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token) { window.location.href = 'login.html'; }
+
+        let activeUjianId = null;
+        let timerInterval = null;
+
+        window.onload = function() {
+            if (role === 'guru') {
+                document.getElementById('panelGuru').classList.remove('hidden');
+                loadDaftarSantri();
+                // Guru bisa pilih santri untuk dipantau
+                document.getElementById('selectMuridGuru').addEventListener('change', function() {
+                    loadUjianAktif(this.value);
+                });
+            } else {
+                // Santri langsung muat ujian miliknya sendiri
+                loadUjianAktif();
+            }
+        };
+
+        async function loadDaftarSantri() {
+            const res = await fetch('/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            const select = document.getElementById('selectMuridGuru');
+            select.innerHTML = '<option value="" disabled selected>- Pilih Santri -</option>';
+            data.forEach(m => {
+                select.innerHTML += `<option value="${m.id}">${m.nama_lengkap}</option>`;
+            });
+        }
+
+        async function mulaiUjianBaru() {
+            const murid_id = document.getElementById('selectMuridGuru').value;
+            const jumlah_juz = parseInt(document.getElementById('inputJumlahJuz').value);
+
+            if (!murid_id) { alert('Pilih santri terlebih dahulu!'); return; }
+
+            // Buat urutan daftar juz otomatis (contoh: 5 juz -> [1,2,3,4,5])
+            const daftar_juz = [];
+            for (let i = 1; i <= jumlah_juz; i++) {
+                daftar_juz.push(i);
+            }
+
+            try {
+                const res = await fetch('/api/ujian/mulai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ murid_id, jumlah_juz, daftar_juz })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    loadUjianAktif(murid_id);
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Kesalahan jaringan.');
+            }
+        }
+
+        async function loadUjianAktif(muridIdQuery = '') {
+            const url = muridIdQuery ? `/api/ujian/aktif?murid_id=${muridIdQuery}` : `/api/ujian/aktif`;
+            try {
+                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+
+                const panelUjian = document.getElementById('panelUjianAktif');
+                const pesanKosong = document.getElementById('pesanBelumAdaUjian');
+
+                if (data.aktif) {
+                    activeUjianId = data.ujian.id;
+                    panelUjian.classList.remove('hidden');
+                    pesanKosong.classList.add('hidden');
+
+                    document.getElementById('labelStatus').innerText = data.ujian.status_ujian;
+                    
+                    const listJuz = JSON.parse(data.ujian.daftar_juz || '[]');
+                    document.getElementById('labelDaftarJuz').innerText = `Juz (${listJuz.join(', ')})`;
+
+                    // Jalankan Timer durasi
+                    mulaiTimer(new Date(data.ujian.waktu_mulai));
+
+                    // Render Tabel Kertas Tasmi'
+                    const tbody = document.getElementById('tabelKertasTasmi');
+                    tbody.innerHTML = '';
+
+                    data.tasmi.forEach(row => {
+                        const isReadonly = role === 'guru' ? 'disabled' : '';
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-[#f0ebd8]/40">
+                                <td class="border border-[#c5a059] p-2 font-bold">${row.nomor}</td>
+                                <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.tanbih}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded tanbih bg-transparent"></td>
+                                <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.khoto}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded khoto bg-transparent"></td>
+                                <td class="border border-[#c5a059] p-1">
+                                    <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="taqdir border rounded p-1 bg-transparent w-full">
+                                        <option value="">- Pilih Taqdir -</option>
+                                        <option value="mumtaz" ${row.taqdir==='mumtaz'?'selected':''}>Mumtaz</option>
+                                        <option value="jayyid_jiddan" ${row.taqdir==='jayyid_jiddan'?'selected':''}>Jayyid Jiddan</option>
+                                        <option value="jayyid" ${row.taqdir==='jayyid'?'selected':''}>Jayyid</option>
+                                    </select>
+                                </td>
+                                <td class="border border-[#c5a059] p-1">
+                                    <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="status border rounded p-1 bg-transparent w-full">
+                                        <option value="">- Pilih -</option>
+                                        <option value="maqbul" ${row.status_kelulusan==='maqbul'?'selected':''}>Maqbul</option>
+                                        <option value="mardud" ${row.status_kelulusan==='mardud'?'selected':''}>Mardud</option>
+                                    </select>
+                                </td>
+                                <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} value="${row.mustami || ''}" onchange="updateTasmi(${row.id}, this)" class="w-full border rounded px-2 mustami bg-transparent" placeholder="Nama penyimak"></td>
+                            </tr>
+                        `;
+                    });
+
+                    // Jika yang login guru, tampilkan panel penilaian akhir
+                    if (role === 'guru') {
+                        document.getElementById('panelNilaiGuru').classList.remove('hidden');
+                        document.getElementById('inputHifdz').value = data.ujian.nilai_hifdz || '';
+                        document.getElementById('inputTajwid').value = data.ujian.nilai_tajwid || '';
+                        document.getElementById('inputTartil').value = data.ujian.nilai_tartil || '';
+                        document.getElementById('previewNilaiAkhir').innerText = data.ujian.nilai_akhir || '-';
+                    }
+
+                } else {
+                    panelUjian.classList.add('hidden');
+                    pesanKosong.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function mulaiTimer(waktuMulai) {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const sekarang = new Date();
+                const selisih = Math.floor((sekarang - waktuMulai) / 1000);
+                const jam = String(Math.floor(selisih / 3600)).padStart(2, '0');
+                const menit = String(Math.floor((selisih % 3600) / 60)).padStart(2, '0');
+                const detik = String(selisih % 60).padStart(2, '0');
+                document.getElementById('timerText').innerText = `${jam}:${menit}:${detik}`;
+            }, 1000);
+        }
+
+        async function updateTasmi(id, element) {
+            if (role === 'guru') return; // Guru hanya membaca
+            const tr = element.closest('tr');
+            const body = {
+                tanbih: tr.querySelector('.tanbih').value,
+                khoto: tr.querySelector('.khoto').value,
+                taqdir: tr.querySelector('.taqdir').value,
+                status_kelulusan: tr.querySelector('.status').value,
+                mustami: tr.querySelector('.mustami').value
+            };
+            await fetch(`/api/ujian/tasmi/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(body)
+            });
+        }
+
+        async function simpanNilaiUjian() {
+            if (!activeUjianId) return;
+            const hifdz = document.getElementById('inputHifdz').value;
+            const tajwid = document.getElementById('inputTajwid').value;
+            const tartil = document.getElementById('inputTartil').value;
+
+            try {
+                const res = await fetch(`/api/ujian/nilai/${activeUjianId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ nilai_hifdz: hifdz, nilai_tajwid: tajwid, nilai_tartil: tartil })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    document.getElementById('previewNilaiAkhir').innerText = result.nilai_akhir;
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Kesalahan jaringan.');
+            }
+        }
+    </script>
+</body>
+</html>

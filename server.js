@@ -413,3 +413,80 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server nyala di port ${PORT}`);
 });
+
+// ==========================================
+// 5. ENDPOINT Ujian Kenaikan Juz (Hifdz, Tajwid, Tartil)
+// ==========================================
+
+
+// Guru menetapkan ujian kenaikan juz untuk santri
+app.post('/api/ujian/mulai', verifyToken, (req, res) => {
+    if (req.user.role !== 'guru') return res.status(403).json({ error: "Khusus akses Muhaffidz!" });
+    
+    const { murid_id, jumlah_juz, daftar_juz } = req.body; // daftar_juz = [1,2,3,4,5]
+    const guru_id = req.user.id;
+    const waktu_mulai = new Date().toISOString();
+
+    const sqlUjian = `INSERT INTO ujian_kenaikan (murid_id, guru_id, jumlah_juz, daftar_juz, waktu_mulai, status_ujian) VALUES (?, ?, ?, ?, ?, 'persiapan')`;
+    
+    db.run(sqlUjian, [murid_id, guru_id, jumlah_juz, JSON.stringify(daftar_juz), waktu_mulai], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        const ujian_id = this.lastID;
+        const totalBaris = Number(jumlah_juz) + 5; // Jumlah juz + 5 baris kosong tambahan
+
+        // Buat baris kosong otomatis untuk Kertas Tasmi'
+        const sqlTasmi = `INSERT INTO kertas_tasmi (ujian_id, nomor, tanbih, khoto) VALUES (?, ?, 0, 0)`;
+        for (let i = 1; i <= totalBaris; i++) {
+            db.run(sqlTasmi, [ujian_id, i]);
+        }
+
+        res.json({ message: "Ujian kenaikan juz berhasil diaktifkan!", ujian_id });
+    });
+});
+
+// Ambil data ujian aktif milik santri / guru
+app.get('/api/ujian/aktif', verifyToken, (req, res) => {
+    const murid_id = req.user.role === 'murid' ? req.user.id : req.query.murid_id;
+    
+    const sql = `SELECT * FROM ujian_kenaikan WHERE murid_id = ? ORDER BY id DESC LIMIT 1`;
+    db.get(sql, [murid_id], (err, ujian) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!ujian) return res.json({ aktif: false });
+
+        db.all(`SELECT * FROM kertas_tasmi WHERE ujian_id = ? ORDER BY nomor ASC`, [ujian.id], (err, tasmi) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ aktif: true, ujian, tasmi });
+        });
+    });
+});
+
+// Santri memperbarui baris kertas tasmi'
+app.put('/api/ujian/tasmi/:id', verifyToken, (req, res) => {
+    if (req.user.role !== 'murid') return res.status(403).json({ error: "Khusus akses murid!" });
+
+    const { tanbih, khoto, taqdir, status_kelulusan, mustami } = req.body;
+    const sql = `UPDATE kertas_tasmi SET tanbih = ?, khoto = ?, taqdir = ?, status_kelulusan = ?, mustami = ? WHERE id = ?`;
+    
+    db.run(sql, [tanbih, khoto, taqdir, status_kelulusan, mustami, req.params.id], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Kertas tasmi' diperbarui." });
+    });
+});
+
+// Guru memberikan penilaian akhir ujian (Hifdz, Tajwid, Tartil)
+app.post('/api/ujian/nilai/:id', verifyToken, (req, res) => {
+    if (req.user.role !== 'guru') return res.status(403).json({ error: "Khusus akses guru!" });
+
+    const { nilai_hifdz, nilai_tajwid, nilai_tartil } = req.body;
+    
+    // Hitung rata-rata: dijumlah lalu dibagi 3
+    const nilai_akhir = (Number(nilai_hifdz) + Number(nilai_tajwid) + Number(nilai_tartil)) / 3;
+
+    const sql = `UPDATE ujian_kenaikan SET nilai_hifdz = ?, nilai_tajwid = ?, nilai_tartil = ?, nilai_akhir = ?, status_ujian = 'selesai' WHERE id = ?`;
+    
+    db.run(sql, [nilai_hifdz, nilai_tajwid, nilai_tartil, nilai_akhir, req.params.id], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Penilaian ujian berhasil disimpan!", nilai_akhir: nilai_akhir.toFixed(2) });
+    });
+});
