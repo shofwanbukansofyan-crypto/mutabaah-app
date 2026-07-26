@@ -149,8 +149,9 @@
                     // ----------------------------------------------------
                     // TEMPATKAN DI SINI: Urutkan hari dari Senin sampai Ahad
                     // ----------------------------------------------------
-                    const urutanHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
-                    data.harian.sort((a, b) => urutanHari.indexOf(a.hari) - urutanHari.indexOf(b.hari));
+                    // Urutan hari dari Senin sampai Ahad dalam bahasa Arab (sesuai data di tabel)
+const urutanHari = ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
+data.harian.sort((a, b) => urutanHari.indexOf(a.hari) - urutanHari.indexOf(b.hari));
 
                     data.harian.forEach(row => {
                         const tr = document.createElement('tr');
