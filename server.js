@@ -379,6 +379,28 @@ app.put('/api/target/:id/status', verifyToken, (req, res) => {
     });
 });
 
+// Guru menghapus seluruh target muroja'ah dalam satu pekan tertentu untuk seorang murid
+app.delete('/api/target/pekan', verifyToken, (req, res) => {
+    if (req.user.role !== 'guru') {
+        return res.status(403).json({ error: "Akses ditolak! Hanya Guru yang bisa menghapus target." });
+    }
+
+    const { murid_id, pekan_ke } = req.query;
+
+    if (!murid_id || !pekan_ke) {
+        return res.status(400).json({ error: "Data murid dan pekan harus disertakan!" });
+    }
+
+    const sql = `DELETE FROM target_murojaah WHERE murid_id = ? AND pekan_ke = ?`;
+    db.run(sql, [murid_id, pekan_ke], function(err) {
+        if (err) return res.status(500).json({ error: "Gagal menghapus target: " + err.message });
+        if (this.changes === 0) {
+            return res.status(404).json({ error: "Target untuk pekan tersebut tidak ditemukan." });
+        }
+        res.json({ message: "Alhamdulillah, Target pekanan berhasil dihapus!" });
+    });
+});
+
 // ==========================================
 // ROUTE UTAMA & NYALAKAN SERVER
 // ==========================================

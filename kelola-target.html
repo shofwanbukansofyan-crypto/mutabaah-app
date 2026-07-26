@@ -41,6 +41,9 @@
             </button>
         </div>
 
+        <!-- Tombol Hapus Satu Pekan (Muncul saat data dimuat) -->
+        <div id="containerAksiPekan" class="mb-4"></div>
+
         <!-- Daftar Target yang Bisa Diedit -->
         <div id="listEditTarget" class="space-y-4">
             <p class="text-center text-gray-500 italic py-8">Silakan pilih siswa dan pekan untuk menampilkan target.</p>
@@ -68,10 +71,12 @@
             const muridId = document.getElementById('pilihMurid').value;
             const pekanKe = document.getElementById('inputPekan').value;
             const container = document.getElementById('listEditTarget');
+            const containerAksi = document.getElementById('containerAksiPekan');
 
             if (!muridId) { alert('Pilih siswa dulu!'); return; }
 
             container.innerHTML = '<p class="text-center">Mencari data...</p>';
+            containerAksi.innerHTML = '';
 
             const res = await fetch(`/api/target?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -82,6 +87,16 @@
                 container.innerHTML = `<p class="text-center text-red-500 font-bold py-4">Belum ada target di pekan ke-${pekanKe} untuk siswa ini.</p>`;
                 return;
             }
+
+            // Tampilkan tombol Hapus Seluruh Pekan di atas daftar
+            containerAksi.innerHTML = `
+                <div class="flex justify-between items-center bg-red-50 p-3 rounded-lg border border-red-300">
+                    <span class="text-sm font-bold text-red-700">⚠️ Zona Bahaya: Hapus seluruh target untuk Pekan ke-${pekanKe} ini?</span>
+                    <button onclick="hapusPekanTarget(${muridId}, ${pekanKe})" class="bg-red-600 text-white font-bold text-xs px-4 py-2 rounded shadow hover:bg-red-700 transition-colors">
+                        Hapus Target Pekan Ini
+                    </button>
+                </div>
+            `;
 
             // Urutkan hari dari Senin sampai Ahad
             const urutanHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
@@ -107,6 +122,31 @@
                     </div>
                 `;
             });
+        }
+
+        async function hapusPekanTarget(muridId, pekanKe) {
+            if (!confirm(`Yakin ingin menghapus seluruh target Pekan ke-${pekanKe} untuk siswa ini? Tindakan ini tidak dapat dibatalkan.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/target/pekan?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    // Reset tampilan setelah dihapus
+                    document.getElementById('listEditTarget').innerHTML = `<p class="text-center text-gray-500 italic py-8">Target pekan ke-${pekanKe} telah dihapus.</p>`;
+                    document.getElementById('containerAksiPekan').innerHTML = '';
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Terjadi kesalahan jaringan.');
+            }
         }
 
         async function simpanPerubahan(id) {
