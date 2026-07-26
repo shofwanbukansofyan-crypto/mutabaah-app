@@ -25,6 +25,12 @@
             <div class="w-20"></div>
         </div>
 
+        <div class="text-center mb-4">
+    <span class="bg-[#113f59] text-white text-xs px-3 py-1 rounded-full font-semibold">
+        📅 Pekan Aktif Saat Ini: <span id="labelPekanAktif" class="text-[#c5a059] font-bold">-</span>
+    </span>
+</div>
+
         <div class="flex justify-center items-center gap-3 mb-6 bg-[#fdfbf7] p-3 rounded-lg border border-[#c5a059]">
             <label class="font-bold text-[#113f59]">Pilih Pekan:</label>
             <input type="number" id="filterPekan" value="1" class="w-20 border-2 border-[#c5a059] p-1 rounded text-center font-bold outline-none">
@@ -77,6 +83,18 @@
                 `;
             });
         }
+
+        async function cekPekanAktif() {
+    const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    if (data.length > 0) {
+        // Ambil pekan terbesar yang ada di database untuk siswa ini
+        const pekanMaksimal = Math.max(...data.map(item => item.pekan_ke));
+        document.getElementById('labelPekanAktif').innerText = `Pekan ke-${pekanMaksimal}`;
+        document.getElementById('filterPekan').value = pekanMaksimal;
+        loadTargetSaya();
+    }
+}
 
         async function updateStatus(id, status) {
             const status_selesai = status ? 1 : 0;

@@ -99,21 +99,31 @@ app.post('/api/rekapan', verifyToken, (req, res) => {
 
     if (!murid_id) return res.status(400).json({ error: "Silakan pilih murid terlebih dahulu!" });
 
-    const sqlMingguan = `INSERT INTO rekapan_mingguan (murid_id, guru_id, pekan_ke, tanggal_mulai, pencapaian_terbaik, catatan_umum) VALUES (?, ?, ?, ?, ?, ?)`;
+    // Cek apakah rekapan untuk pekan ini sudah ada sebelumnya bagi siswa tersebut
+    const checkSql = `SELECT id FROM rekapan_mingguan WHERE murid_id = ? AND pekan_ke = ?`;
+    db.get(checkSql, [murid_id, pekan_ke], (err, row) => {
+        if (err) return res.status(500).json({ error: "Terjadi kesalahan database." });
+        if (row) {
+            return res.status(400).json({ error: `Rekapan untuk Pekan ke-${pekan_ke} bagi siswa ini sudah pernah dibuat sebelumnya!` });
+        }
 
-    db.run(sqlMingguan, [murid_id, guru_id, pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum], function(err) {
-        if (err) return res.status(500).json({ error: "Gagal menyimpan data mingguan: " + err.message });
+        // Jika belum ada, lanjutkan proses simpan
+        const sqlMingguan = `INSERT INTO rekapan_mingguan (murid_id, guru_id, pekan_ke, tanggal_mulai, pencapaian_terbaik, catatan_umum) VALUES (?, ?, ?, ?, ?, ?)`;
 
-        const id_mingguan = this.lastID;
-        const sqlHarian = `INSERT INTO rekapan_harian (rekapan_mingguan_id, hari, hafalan_surah_ayat, nilai_hafalan, murojaah_surah_ayat, nilai_murojaah, catatan_harian) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        db.run(sqlMingguan, [murid_id, guru_id, pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum], function(err) {
+            if (err) return res.status(500).json({ error: "Gagal menyimpan data mingguan: " + err.message });
 
-        data_harian.forEach(hari => {
-            db.run(sqlHarian, [id_mingguan, hari.nama_hari, hari.hafalan, hari.nilai_hafalan, hari.murojaah, hari.nilai_murojaah, hari.catatan], (err) => {
-                if (err) console.error("Gagal simpan data harian:", err.message);
+            const id_mingguan = this.lastID;
+            const sqlHarian = `INSERT INTO rekapan_harian (rekapan_mingguan_id, hari, hafalan_surah_ayat, nilai_hafalan, murojaah_surah_ayat, nilai_murojaah, catatan_harian) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+            data_harian.forEach(hari => {
+                db.run(sqlHarian, [id_mingguan, hari.nama_hari, hari.hafalan, hari.nilai_hafalan, hari.murojaah, hari.nilai_murojaah, hari.catatan], (err) => {
+                    if (err) console.error("Gagal simpan data harian:", err.message);
+                });
             });
-        });
 
-        res.json({ message: "Alhamdulillah, Data rekapan berhasil disimpan!" });
+            res.json({ message: "Alhamdulillah, Data rekapan berhasil disimpan!" });
+        });
     });
 });
 
