@@ -363,6 +363,22 @@ app.put('/api/target/:id/edit', verifyToken, (req, res) => {
     });
 });
 
+// Siswa memperbarui status centang target harian
+app.put('/api/target/:id/status', verifyToken, (req, res) => {
+    if (req.user.role !== 'murid') {
+        return res.status(403).json({ error: "Akses ditolak! Hanya siswa yang bisa mengubah status target." });
+    }
+
+    const targetId = req.params.id;
+    const { status_selesai } = req.body;
+
+    const sql = `UPDATE target_murojaah SET status_selesai = ? WHERE id = ? AND murid_id = ?`;
+    db.run(sql, [status_selesai, targetId, req.user.id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Status target berhasil diperbarui!" });
+    });
+});
+
 // ==========================================
 // ROUTE UTAMA & NYALAKAN SERVER
 // ==========================================

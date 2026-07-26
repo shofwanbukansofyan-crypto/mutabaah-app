@@ -95,7 +95,11 @@
                 container.innerHTML = '';
                 
                 data.forEach(item => {
-                    if (Number(item.status_selesai) === 1) selesaiCount++;
+                    // Pastikan pengecekan status selesai membaca angka 1
+                    if (Number(item.status_selesai) === 1) {
+                        selesaiCount++;
+                    }
+
                     const isChecked = Number(item.status_selesai) === 1 ? 'checked' : '';
                     const styleCoret = Number(item.status_selesai) === 1 ? 'line-through text-gray-400' : 'text-[#113f59]';
 
@@ -114,6 +118,7 @@
                     `;
                 });
 
+                // Perbarui progress bar berdasarkan hitungan terbaru
                 updateProgress(selesaiCount, data.length);
             } catch (err) {
                 console.error("Gagal memuat target:", err);
@@ -121,7 +126,7 @@
                 updateProgress(0, 0);
             }
         }
-
+        
         async function cekPekanAktif() {
             try {
                 const res = await fetch(`/api/target/pekan-aktif`, { 
