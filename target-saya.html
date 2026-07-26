@@ -149,28 +149,33 @@
 
        async function cekPekanAktif() {
             try {
-                const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
+                // Tembak endpoint khusus pekan aktif
+                const res = await fetch(`/api/target/pekan-aktif`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                
                 if (res.ok) {
                     const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
-                        
-                        // Perbarui teks pada badge pekan aktif
-                        const labelPekan = document.getElementById('labelPekanAktif');
-                        if (labelPekan) {
-                            labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
-                        }
-                        
-                        // Perbarui nilai input filter pekan
-                        document.getElementById('filterPekan').value = pekanMaksimal;
+                    const pekanMaksimal = data.pekan_aktif || 1;
+                    
+                    // Update teks badge pekan aktif
+                    const labelPekan = document.getElementById('labelPekanAktif');
+                    if (labelPekan) {
+                        labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
                     }
+                    
+                    // Set nilai filter pekan
+                    document.getElementById('filterPekan').value = pekanMaksimal;
                 }
+                
+                // Muat daftar target sesuai pekan aktif
                 loadTargetSaya();
             } catch (err) {
                 console.error("Gagal mendeteksi pekan aktif:", err);
                 loadTargetSaya();
             }
         }
+        
     </script>
 </body>
 </html>
