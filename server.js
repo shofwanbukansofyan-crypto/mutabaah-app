@@ -295,7 +295,6 @@ app.post('/api/target', verifyToken, (req, res) => {
         return res.status(400).json({ error: "Data target belum lengkap!" });
     }
 
-    // Cek apakah target untuk pekan ini sudah pernah dibuat sebelumnya untuk siswa tersebut
     const checkSql = `SELECT id FROM target_murojaah WHERE murid_id = ? AND pekan_ke = ? LIMIT 1`;
     db.get(checkSql, [murid_id, pekan_ke], (err, row) => {
         if (err) return res.status(500).json({ error: "Terjadi kesalahan database." });
@@ -315,18 +314,31 @@ app.post('/api/target', verifyToken, (req, res) => {
     });
 });
 
-// Siswa atau Guru melihat daftar target berdasarkan murid & pekan
+// PENTING: Letakkan endpoint khusus /pekan-aktif DI ATAS rute umum /api/target
+app.get('/api/target/pekan-aktif', verifyToken, (req, res) => {
+    if (req.user.role !== 'murid') {
+        return res.status(403).json({ error: "Khusus akses murid!" });
+    }
+    
+    const murid_id = req.user.id;
+    const sql = `SELECT MAX(pekan_ke) as pekan_maksimal FROM target_murojaah WHERE murid_id = ?`;
+    
+    db.get(sql, [murid_id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const pekanMaksimal = row && row.pekan_maksimal ? row.pekan_maksimal : 1;
+        res.json({ pekan_aktif: pekanMaksimal });
+    });
+});
 
+// Siswa atau Guru melihat daftar target berdasarkan murid & pekan
 app.get('/api/target', verifyToken, (req, res) => {
     const { murid_id, pekan_ke } = req.query;
     
-    // Jika yang login adalah murid, paksa gunakan ID miliknya sendiri
     let targetMuridId = req.user.role === 'murid' ? req.user.id : murid_id;
 
     let sql = `SELECT * FROM target_murojaah WHERE murid_id = ?`;
     let params = [targetMuridId];
 
-    // Jika ada filter pekan_ke, tambahkan ke query SQL
     if (pekan_ke) {
         sql += ` AND pekan_ke = ?`;
         params.push(pekan_ke);
@@ -351,21 +363,6 @@ app.put('/api/target/:id/edit', verifyToken, (req, res) => {
     });
 });
 
-// Endpoint khusus untuk mendeteksi pekan maksimal aktif milik siswa
-app.get('/api/target/pekan-aktif', verifyToken, (req, res) => {
-    if (req.user.role !== 'murid') {
-        return res.status(403).json({ error: "Khusus akses murid!" });
-    }
-    
-    const murid_id = req.user.id;
-    const sql = `SELECT MAX(pekan_ke) as pekan_maksimal FROM target_murojaah WHERE murid_id = ?`;
-    
-    db.get(sql, [murid_id], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-        const pekanMaksimal = row && row.pekan_maksimal ? row.pekan_maksimal : 1;
-        res.json({ pekan_aktif: pekanMaksimal });
-    });
-});
 // ==========================================
 // ROUTE UTAMA & NYALAKAN SERVER
 // ==========================================

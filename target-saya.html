@@ -58,7 +58,6 @@
         const token = localStorage.getItem('token');
         if (!token) { window.location.href = 'login.html'; }
 
-        // Jalankan cek pekan aktif saat halaman pertama kali dibuka
         // Jalankan saat halaman pertama kali dimuat
         window.onload = function() {
             cekPekanAktif();
@@ -74,7 +73,6 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
-                // Jika server merespons error, hentikan dan tampilkan info
                 if (!res.ok) {
                     container.innerHTML = `<p class="text-center text-red-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
                     updateProgress(0, 0);
@@ -126,30 +124,6 @@
 
         async function cekPekanAktif() {
             try {
-                const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
-                        
-                        const labelPekan = document.getElementById('labelPekanAktif');
-                        if (labelPekan) {
-                            labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
-                        }
-                        
-                        document.getElementById('filterPekan').value = pekanMaksimal;
-                    }
-                }
-                loadTargetSaya();
-            } catch (err) {
-                console.error("Gagal mendeteksi pekan aktif:", err);
-                loadTargetSaya();
-            }
-        }
-
-       async function cekPekanAktif() {
-            try {
-                // Tembak endpoint khusus pekan aktif
                 const res = await fetch(`/api/target/pekan-aktif`, { 
                     headers: { 'Authorization': `Bearer ${token}` } 
                 });
@@ -158,24 +132,42 @@
                     const data = await res.json();
                     const pekanMaksimal = data.pekan_aktif || 1;
                     
-                    // Update teks badge pekan aktif
                     const labelPekan = document.getElementById('labelPekanAktif');
                     if (labelPekan) {
                         labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
                     }
                     
-                    // Set nilai filter pekan
                     document.getElementById('filterPekan').value = pekanMaksimal;
                 }
                 
-                // Muat daftar target sesuai pekan aktif
                 loadTargetSaya();
             } catch (err) {
                 console.error("Gagal mendeteksi pekan aktif:", err);
                 loadTargetSaya();
             }
         }
-        
+
+        function updateProgress(selesai, total) {
+            const progressBar = document.getElementById('progressBar');
+            const textProgres = document.getElementById('textProgres');
+            
+            if (progressBar && textProgres) {
+                const persen = total === 0 ? 0 : Math.round((selesai / total) * 100);
+                progressBar.style.width = `${persen}%`;
+                textProgres.innerText = `${selesai} dari ${total} Selesai (${persen}%)`;
+            }
+        }
+
+        async function updateStatus(id, status) {
+            const status_selesai = status ? 1 : 0;
+            await fetch(`/api/target/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ status_selesai })
+            });
+            loadTargetSaya();
+        }
+
     </script>
 </body>
 </html>
