@@ -28,7 +28,7 @@
                     <h1 id="judulHalaman" class="text-2xl font-bold">Detail Mutaba'ah Mingguan</h1>
                 </div>
                 
-                <div class="flex flex-col md:flex-row justify-center gap-6 text-[#113f59] font-bold text-lg" dir="ltr">
+                <div class="flex flex-col md:flex-row justify-center gap-6 text-[#113f59] font-bold text-lg" dir="rtl">
                     <div class="flex items-center gap-2">
                         <label>Pekan Ke- :</label>
                         <span id="viewPekan" class="text-[#c5a059]">-</span>
@@ -44,17 +44,16 @@
             <div class="w-24"></div>
         </div>
 
-        <!-- Bungkus tabel dengan div agar responsive dan bisa di-scroll di HP -->
         <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 15px;">
             <table class="w-full text-right border-collapse border-4 border-[#c5a059] min-w-[800px]" dir="rtl">
                 <thead class="bg-[#113f59] text-white">
                     <tr>
-                        <th class="border border-[#c5a059] p-3 w-[10%]">اليوم </th>
-                        <th class="border border-[#c5a059] p-3 w-[20%]">الحفظ </th>
-                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير </th>
-                        <th class="border border-[#c5a059] p-3 w-[20%]">المراجعة </th>
-                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير </th>
-                        <th class="border border-[#c5a059] p-3 w-[20%]">ملاحظات </th>
+                        <th class="border border-[#c5a059] p-3 w-[10%]">اليوم (Hari)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">الحفظ (Hafalan)</th>
+                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">المراجعة (Muroja'ah)</th>
+                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">ملاحظات (Catatan)</th>
                     </tr>
                 </thead>
                 <tbody id="tabelDetailHarian" class="text-[#113f59] bg-[#fdfbf7]">
@@ -77,10 +76,12 @@
             </div>
         </div>
 
-        <!-- Tombol Simpan Perubahan (Hanya muncul untuk Guru) -->
-        <div id="containerBtnSimpan" class="mt-6 text-center hidden">
+        <div id="containerBtnSimpan" class="mt-6 text-center hidden flex flex-col md:flex-row justify-center gap-4">
             <button id="btnSimpanEdit" class="bg-[#113f59] text-white font-bold px-8 py-2.5 rounded shadow-lg hover:bg-[#0c2d40] border border-[#c5a059] transition-all">
-                Simpan Perubahan Rekapan
+                Simpan Perubahan
+            </button>
+            <button id="btnHapusRekapan" class="bg-red-700 text-white font-bold px-8 py-2.5 rounded shadow-lg hover:bg-red-800 border border-red-900 transition-all">
+                Hapus Rekapan
             </button>
         </div>
 
@@ -99,7 +100,6 @@
 
         async function loadDetail() {
             try {
-                // Menggunakan endpoint relatif agar aman di Railway maupun lokal
                 const res = await fetch(`/api/rekapan/${rekapanId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -187,6 +187,7 @@
         }
 
         if (role === 'guru') {
+            // Aksi Simpan Perubahan
             document.getElementById('btnSimpanEdit').addEventListener('click', async () => {
                 const pekan_ke = document.getElementById('editPekan').value;
                 const tanggal_mulai = document.getElementById('editTanggal').value;
@@ -208,11 +209,33 @@
                 });
 
                 try {
-                    // PERBAIKAN DI SINI: Menggunakan URL relatif (/api/...) agar tidak error CORS / localhost di Railway
                     const res = await fetch(`/api/rekapan/${rekapanId}/edit`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum, data_harian })
+                    });
+                    const result = await res.json();
+
+                    if (res.ok) {
+                        alert(result.message);
+                        window.location.href = 'daftar-rekap.html';
+                    } else {
+                        alert('Gagal: ' + result.error);
+                    }
+                } catch (err) {
+                    alert('Terjadi kesalahan jaringan.');
+                }
+            });
+
+            // Aksi Hapus Rekapan
+            document.getElementById('btnHapusRekapan').addEventListener('click', async () => {
+                const konfirmasi = confirm("Yakin ingin menghapus rekapan mingguan ini? Data yang dihapus tidak bisa dikembalikan.");
+                if (!konfirmasi) return;
+
+                try {
+                    const res = await fetch(`/api/rekapan/${rekapanId}/delete`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const result = await res.json();
 

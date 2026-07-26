@@ -43,10 +43,9 @@ app.post('/api/register', (req, res) => {
         }
         
         // AUTO-LOGIN: Setelah berhasil simpan ke database, langsung buatkan Token JWT
-        const newUserId = this.lastID; // Mendapatkan ID user yang baru saja dibuat
+        const newUserId = this.lastID;
         const token = jwt.sign({ id: newUserId, role: role, nama: nama_lengkap }, SECRET_KEY, { expiresIn: '1d' });
 
-        // Kirim respon sukses beserta token ke browser
         res.json({ 
             message: "Akun berhasil didaftarkan! Mengalihkan ke menu utama...",
             token: token,
@@ -68,16 +67,23 @@ app.post('/api/login', (req, res) => {
     });
 });
 
+// Endpoint untuk melihat semua data user
+app.get('/api/users', (req, res) => {
+    db.all("SELECT id, nama_lengkap, username, role FROM users", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+});
 
 // ==========================================
-// 2. ENDPOINT MURID (BARU)
+// 2. ENDPOINT MURID
 // ==========================================
 // Mengambil daftar murid khusus untuk guru yang sedang login
 app.get('/api/murid', verifyToken, (req, res) => {
-    // Tarik SEMUA user yang rolenya 'murid' tanpa memperdulikan guru_id
     const sql = `SELECT id, nama_lengkap FROM users WHERE role = 'murid'`;
     
-    // Hapus parameter [guru_id] menjadi []
     db.all(sql, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
@@ -85,10 +91,9 @@ app.get('/api/murid', verifyToken, (req, res) => {
 });
 
 // ==========================================
-// 3. ENDPOINT REKAPAN (SIMPAN & AMBIL DATA)
+// 3. ENDPOINT REKAPAN (SIMPAN, AMBIL, EDIT & HAPUS DATA)
 // ==========================================
 app.post('/api/rekapan', verifyToken, (req, res) => {
-    // Sekarang murid_id diambil dari form (req.body), dan guru_id diambil dari token (req.user.id)
     const { murid_id, pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum, data_harian } = req.body;
     const guru_id = req.user.id; 
 
@@ -120,10 +125,6 @@ app.get('/api/rekapan', verifyToken, (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server nyala di port ${PORT}`);
-});
-
 // Mengambil detail rekap berdasarkan ID (untuk halaman detail-rekap.html)
 app.get('/api/rekapan/:id', verifyToken, (req, res) => {
     const id = req.params.id;
@@ -151,14 +152,11 @@ app.put('/api/rekapan/:id/edit', verifyToken, (req, res) => {
     const rekapanId = req.params.id;
     const { pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum, data_harian } = req.body;
 
-    // 1. Update data header mingguan
     const sqlMingguan = `UPDATE rekapan_mingguan SET pekan_ke = ?, tanggal_mulai = ?, pencapaian_terbaik = ?, catatan_umum = ? WHERE id = ?`;
     
     db.run(sqlMingguan, [pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum, rekapanId], (err) => {
         if (err) return res.status(500).json({ error: "Gagal update data mingguan: " + err.message });
 
-        // 2. Update rincian harian satu per satu berdasarkan ID harian atau hapus-masukkan ulang
-        // Cara paling aman & rapi: Hapus data harian lama untuk ID ini, lalu masukkan yang baru
         const sqlDeleteHarian = `DELETE FROM rekapan_harian WHERE rekapan_mingguan_id = ?`;
         db.run(sqlDeleteHarian, [rekapanId], (err) => {
             if (err) return res.status(500).json({ error: "Gagal memperbarui rincian harian." });
@@ -176,6 +174,28 @@ app.put('/api/rekapan/:id/edit', verifyToken, (req, res) => {
     });
 });
 
+// Guru menghapus rekapan mingguan beserta rincian harian
+app.delete('/api/rekapan/:id/delete', verifyToken, (req, res) => {
+    if (req.user.role !== 'guru') {
+        return res.status(403).json({ error: "Akses ditolak! Hanya Guru yang bisa menghapus rekapan." });
+    }
+
+    const rekapanId = req.params.id;
+
+    const sqlHarian = `DELETE FROM rekapan_harian WHERE rekapan_mingguan_id = ?`;
+    const sqlMingguan = `DELETE FROM rekapan_mingguan WHERE id = ?`;
+
+    db.run(sqlHarian, [rekapanId], (err) => {
+        if (err) return res.status(500).json({ error: "Gagal menghapus rincian harian: " + err.message });
+
+        db.run(sqlMingguan, [rekapanId], (err) => {
+            if (err) return res.status(500).json({ error: "Gagal menghapus rekapan mingguan: " + err.message });
+
+            res.json({ message: "Alhamdulillah, Rekapan berhasil dihapus!" });
+        });
+    });
+});
+
 // ==========================================
 // 4. ENDPOINT TARGET MUROJA'AH
 // ==========================================
@@ -183,7 +203,7 @@ app.put('/api/rekapan/:id/edit', verifyToken, (req, res) => {
 // Guru menyimpan target harian untuk murid
 app.post('/api/target', verifyToken, (req, res) => {
     const guru_id = req.user.id;
-    const { murid_id, pekan_ke, targets } = req.body; // targets adalah array berisi { hari, isi_target }
+    const { murid_id, pekan_ke, targets } = req.body;
 
     if (!murid_id || !pekan_ke || !targets) {
         return res.status(400).json({ error: "Data target belum lengkap!" });
@@ -204,7 +224,6 @@ app.post('/api/target', verifyToken, (req, res) => {
 app.get('/api/target', verifyToken, (req, res) => {
     const { murid_id, pekan_ke } = req.query;
     
-    // Jika yang login murid, paksa ambil ID miliknya sendiri
     let targetMuridId = req.user.role === 'murid' ? req.user.id : murid_id;
 
     const sql = `SELECT * FROM target_murojaah WHERE murid_id = ? AND pekan_ke = ?`;
@@ -217,7 +236,7 @@ app.get('/api/target', verifyToken, (req, res) => {
 // Siswa mengubah status ceklis (selesai / belum)
 app.put('/api/target/:id/status', verifyToken, (req, res) => {
     const targetId = req.params.id;
-    const { status_selesai } = req.body; // 1 atau 0
+    const { status_selesai } = req.body;
 
     const sql = `UPDATE target_murojaah SET status_selesai = ? WHERE id = ?`;
     db.run(sql, [status_selesai, targetId], function(err) {
@@ -239,16 +258,13 @@ app.put('/api/target/:id/edit', verifyToken, (req, res) => {
     });
 });
 
+// ==========================================
+// ROUTE UTAMA & NYALAKAN SERVER
+// ==========================================
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/login.html');
+    res.sendFile(__dirname + '/login.html');
 });
 
-// Endpoint untuk melihat semua data user
-app.get('/api/users', (req, res) => {
-  db.all("SELECT id, nama_lengkap, username, role FROM users", [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
+app.listen(PORT, () => {
+    console.log(`Server nyala di port ${PORT}`);
 });
