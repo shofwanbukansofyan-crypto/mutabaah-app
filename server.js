@@ -118,6 +118,55 @@ app.post('/api/rekapan', verifyToken, (req, res) => {
 });
 
 app.get('/api/rekapan', verifyToken, (req, res) => {
+    let sql;
+    let params = [];
+
+    // Jika yang login adalah murid, batasi hanya ambil rekapan miliknya sendiri
+    if (req.user.role === 'murid') {
+        sql = `SELECT id, pekan_ke, tanggal_mulai, pencapaian_terbaik FROM rekapan_mingguan WHERE murid_id = ? ORDER BY pekan_ke DESC`;
+        params = [req.user.id];
+    } else {
+        // Jika guru, tampilkan semuanya
+        sql = `SELECT id, pekan_ke, tanggal_mulai, pencapaian_terbaik FROM rekapan_mingguan ORDER BY pekan_ke DESC`;
+    }
+
+    db.all(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.get('/api/rekapan/:id', verifyToken, (req, res) => {
+    const id = req.params.id;
+
+    let sqlMingguan = `
+        SELECT rm.*, u.nama_lengkap AS nama_murid 
+        FROM rekapan_mingguan rm 
+        JOIN users u ON rm.murid_id = u.id 
+        WHERE rm.id = ?
+    `;
+    let params = [id];
+
+    // Jika yang login murid, pastikan rekapan tersebut benar-benar miliknya
+    if (req.user.role === 'murid') {
+        sqlMingguan += ` AND rm.murid_id = ?`;
+        params.push(req.user.id);
+    }
+
+    const sqlHarian = `SELECT * FROM rekapan_harian WHERE rekapan_mingguan_id = ?`;
+
+    db.get(sqlMingguan, params, (err, mingguan) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!mingguan) return res.status(404).json({ error: "Data rekapan tidak ditemukan atau Anda tidak memiliki hak akses." });
+
+        db.all(sqlHarian, [id], (err, harian) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ mingguan, harian });
+        });
+    });
+});
+
+app.get('/api/rekapan', verifyToken, (req, res) => {
     const sql = `SELECT id, pekan_ke, tanggal_mulai, pencapaian_terbaik FROM rekapan_mingguan ORDER BY pekan_ke DESC`;
     db.all(sql, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
