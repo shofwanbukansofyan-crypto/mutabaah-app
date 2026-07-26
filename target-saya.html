@@ -37,17 +37,20 @@
 
     </div>
 
-    <script>
+  <script>
         const token = localStorage.getItem('token');
         if (!token) { window.location.href = 'login.html'; }
 
         async function loadTargetSaya() {
             const pekan = document.getElementById('filterPekan').value;
-            const res = await fetch(`/api/target`, {
+            const container = document.getElementById('listTarget');
+            container.innerHTML = '<p class="text-center text-gray-500 italic">Memuat target...</p>';
+
+            // Mengirim query parameter pekan_ke
+            const res = await fetch(`/api/target?pekan_ke=${pekan}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            const container = document.getElementById('listTarget');
 
             if (data.length === 0) {
                 container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
@@ -77,12 +80,13 @@
 
         async function updateStatus(id, status) {
             const status_selesai = status ? 1 : 0;
-            await fetch(`/api/target`, {
+            // Menggunakan endpoint /api/target/:id/status sesuai server.js
+            await fetch(`/api/target/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ status_selesai })
             });
-            loadTargetSaya(); // Muat ulang tampilan agar efek coretnya pas
+            loadTargetSaya();
         }
 
         window.onload = loadTargetSaya;

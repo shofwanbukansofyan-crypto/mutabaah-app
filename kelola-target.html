@@ -53,7 +53,6 @@
         const role = localStorage.getItem('role');
         if (role !== 'guru' || !token) { window.location.href = 'login.html'; }
 
-        // Ambil daftar murid buat dropdown
         async function loadMurid() {
             const res = await fetch('/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
@@ -65,7 +64,6 @@
         }
         loadMurid();
 
-        // Cari dan Tampilkan Target
         async function cariTarget() {
             const muridId = document.getElementById('pilihMurid').value;
             const pekanKe = document.getElementById('inputPekan').value;
@@ -75,7 +73,8 @@
 
             container.innerHTML = '<p class="text-center">Mencari data...</p>';
 
-            const res = await fetch(`/api/target`, {
+            // Mengirim query parameter murid_id dan pekan_ke ke backend
+            const res = await fetch(`/api/target?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -87,7 +86,6 @@
 
             container.innerHTML = '';
             data.forEach(item => {
-                // Tampilkan badge kalau tugas sudah selesai dikerjakan siswa
                 const badgeStatus = item.status_selesai === 1 
                     ? `<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">Selesai Dikerjakan</span>` 
                     : `<span class="text-xs font-bold text-gray-500">Belum Dikerjakan</span>`;
@@ -108,12 +106,12 @@
             });
         }
 
-        // Fungsi Simpan Perubahan API
         async function simpanPerubahan(id) {
             const inputBaru = document.getElementById(`edit-isi-${id}`).value;
             
             try {
-                const res = await fetch(`/api/target`, {
+                // Menggunakan endpoint /api/target/:id/edit sesuai server.js
+                const res = await fetch(`/api/target/${id}/edit`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ isi_target: inputBaru })
