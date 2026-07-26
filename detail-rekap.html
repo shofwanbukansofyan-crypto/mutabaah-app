@@ -44,28 +44,23 @@
             <div class="w-24"></div>
         </div>
 
-        <div class="overflow-x-auto mb-8">
-            <!-- Bungkus tabel dengan div ini -->
-<div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 15px;">
-  <table style="width: 100%; border-collapse: collapse;">
-    <!-- Isi tabel Abang yang sudah ada tetap di dalam sini -->
-    <table class="w-full text-right border-collapse border-4 border-[#c5a059] min-w-[800px]" dir="rtl">
-        <thead class="bg-[#113f59] text-white">
-            <tr>
-                <th class="border border-[#c5a059] p-3 w-[10%]">اليوم (Hari)</th>
-                <th class="border border-[#c5a059] p-3 w-[20%]">الحفظ (Hafalan)</th>
-                <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
-                <th class="border border-[#c5a059] p-3 w-[20%]">المراجعة (Muroja'ah)</th>
-                <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
-                <th class="border border-[#c5a059] p-3 w-[20%]">ملاحظات (Catatan)</th>
-            </tr>
-        </thead>
-        <tbody id="tabelDetailHarian" class="text-[#113f59] bg-[#fdfbf7]">
-            <tr><td colspan="6" class="p-4 text-center italic text-gray-500">Memuat data...</td></tr>
-        </tbody>
-    </table>
-  </table>
-</div>
+        <!-- Bungkus tabel dengan div agar responsive dan bisa di-scroll di HP -->
+        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 15px;">
+            <table class="w-full text-right border-collapse border-4 border-[#c5a059] min-w-[800px]" dir="rtl">
+                <thead class="bg-[#113f59] text-white">
+                    <tr>
+                        <th class="border border-[#c5a059] p-3 w-[10%]">اليوم (Hari)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">الحفظ (Hafalan)</th>
+                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">المراجعة (Muroja'ah)</th>
+                        <th class="border border-[#c5a059] p-3 w-[15%]">تقدير (Nilai)</th>
+                        <th class="border border-[#c5a059] p-3 w-[20%]">ملاحظات (Catatan)</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelDetailHarian" class="text-[#113f59] bg-[#fdfbf7]">
+                    <tr><td colspan="6" class="p-4 text-center italic text-gray-500">Memuat data...</td></tr>
+                </tbody>
+            </table>
         </div>
 
         <div class="border-2 border-[#c5a059] p-5 rounded-lg bg-[#fdfbf7] text-left text-[#113f59]" dir="ltr">
@@ -104,7 +99,8 @@
 
         async function loadDetail() {
             try {
-                const res = await fetch('/api/rekapan', {
+                // Menggunakan endpoint relatif agar aman di Railway maupun lokal
+                const res = await fetch(`/api/rekapan/${rekapanId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
@@ -113,7 +109,6 @@
                     const m = data.mingguan;
                     dataGlobalHarian = data.harian;
 
-                    // Jika yang login GURU, aktifkan mode edit di layar
                     if (role === 'guru') {
                         document.getElementById('judulHalaman').innerText = "Edit Mutaba'ah Mingguan";
                         
@@ -135,14 +130,12 @@
 
                         document.getElementById('containerBtnSimpan').classList.remove('hidden');
                     } else {
-                        // Mode Siswa (Read-Only)
                         document.getElementById('viewPekan').innerText = m.pekan_ke;
                         document.getElementById('viewTanggal').innerText = m.tanggal_mulai;
                         document.getElementById('viewSaran').innerText = m.pencapaian_terbaik || '-';
                         document.getElementById('viewCatatan').innerText = m.catatan_umum || '-';
                     }
 
-                    // Render Tabel (Beda wujud antara Guru vs Siswa)
                     const tbody = document.getElementById('tabelDetailHarian');
                     tbody.innerHTML = '';
 
@@ -151,7 +144,6 @@
                         tr.className = "hover:bg-[#f0ebd8]/50 transition-colors bg-[#fdfbf7]";
 
                         if (role === 'guru') {
-                            // Tampilkan dalam bentuk Kotak Input & Select agar bisa diubah Ustadz
                             tr.innerHTML = `
                                 <td class="border border-[#c5a059] p-2 font-bold text-center" data-hari="${row.hari}">${row.hari}</td>
                                 <td class="border border-[#c5a059] p-0"><input type="text" class="input-hafalan w-full h-full p-2 bg-transparent outline-none focus:bg-[#f0ebd8]" value="${row.hafalan_surah_ayat || ''}"></td>
@@ -175,7 +167,6 @@
                                 <td class="border border-[#c5a059] p-0"><input type="text" class="input-catatan w-full h-full p-2 bg-transparent outline-none focus:bg-[#f0ebd8]" value="${row.catatan_harian || ''}"></td>
                             `;
                         } else {
-                            // Tampilkan sebagai Teks Biasa untuk Siswa
                             tr.innerHTML = `
                                 <td class="border border-[#c5a059] p-3 font-bold text-center">${row.hari}</td>
                                 <td class="border border-[#c5a059] p-3 font-semibold">${row.hafalan_surah_ayat || '-'}</td>
@@ -195,7 +186,6 @@
             }
         }
 
-        // Tombol Simpan Perubahan oleh Guru
         if (role === 'guru') {
             document.getElementById('btnSimpanEdit').addEventListener('click', async () => {
                 const pekan_ke = document.getElementById('editPekan').value;
@@ -218,7 +208,8 @@
                 });
 
                 try {
-                    const res = await fetch(`http://localhost:3000/api/rekapan/${rekapanId}/edit`, {
+                    // PERBAIKAN DI SINI: Menggunakan URL relatif (/api/...) agar tidak error CORS / localhost di Railway
+                    const res = await fetch(`/api/rekapan/${rekapanId}/edit`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ pekan_ke, tanggal_mulai, saran_pengembangan, catatan_umum, data_harian })
