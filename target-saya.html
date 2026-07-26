@@ -58,7 +58,6 @@
         const token = localStorage.getItem('token');
         if (!token) { window.location.href = 'login.html'; }
 
-        // Jalankan saat halaman pertama kali dimuat
         window.onload = function() {
             cekPekanAktif();
         };
@@ -95,11 +94,7 @@
                 container.innerHTML = '';
                 
                 data.forEach(item => {
-                    // Pastikan pengecekan status selesai membaca angka 1
-                    if (Number(item.status_selesai) === 1) {
-                        selesaiCount++;
-                    }
-
+                    if (Number(item.status_selesai) === 1) selesaiCount++;
                     const isChecked = Number(item.status_selesai) === 1 ? 'checked' : '';
                     const styleCoret = Number(item.status_selesai) === 1 ? 'line-through text-gray-400' : 'text-[#113f59]';
 
@@ -118,7 +113,6 @@
                     `;
                 });
 
-                // Perbarui progress bar berdasarkan hitungan terbaru
                 updateProgress(selesaiCount, data.length);
             } catch (err) {
                 console.error("Gagal memuat target:", err);
@@ -126,25 +120,35 @@
                 updateProgress(0, 0);
             }
         }
-        
+
         async function cekPekanAktif() {
             try {
+                // Coba ambil dari endpoint pekan-aktif
                 const res = await fetch(`/api/target/pekan-aktif`, { 
                     headers: { 'Authorization': `Bearer ${token}` } 
                 });
                 
+                let pekanMaksimal = 1;
                 if (res.ok) {
                     const data = await res.json();
-                    const pekanMaksimal = data.pekan_aktif || 1;
-                    
-                    const labelPekan = document.getElementById('labelPekanAktif');
-                    if (labelPekan) {
-                        labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
+                    pekanMaksimal = data.pekan_aktif || 1;
+                } else {
+                    // Fallback cadangan jika endpoint khusus gagal: ambil dari rute umum
+                    const resAll = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (resAll.ok) {
+                        const allData = await resAll.json();
+                        if (Array.isArray(allData) && allData.length > 0) {
+                            pekanMaksimal = Math.max(...allData.map(item => Number(item.pekan_ke) || 1));
+                        }
                     }
-                    
-                    document.getElementById('filterPekan').value = pekanMaksimal;
                 }
                 
+                const labelPekan = document.getElementById('labelPekanAktif');
+                if (labelPekan) {
+                    labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
+                }
+                
+                document.getElementById('filterPekan').value = pekanMaksimal;
                 loadTargetSaya();
             } catch (err) {
                 console.error("Gagal mendeteksi pekan aktif:", err);
@@ -172,7 +176,6 @@
             });
             loadTargetSaya();
         }
-
     </script>
 </body>
 </html>

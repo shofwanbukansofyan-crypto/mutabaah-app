@@ -315,6 +315,7 @@ app.post('/api/target', verifyToken, (req, res) => {
 });
 
 // PENTING: Letakkan endpoint khusus /pekan-aktif DI ATAS rute umum /api/target
+// Endpoint khusus untuk mendeteksi pekan maksimal aktif milik siswa
 app.get('/api/target/pekan-aktif', verifyToken, (req, res) => {
     if (req.user.role !== 'murid') {
         return res.status(403).json({ error: "Khusus akses murid!" });
@@ -325,7 +326,8 @@ app.get('/api/target/pekan-aktif', verifyToken, (req, res) => {
     
     db.get(sql, [murid_id], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
-        const pekanMaksimal = row && row.pekan_maksimal ? row.pekan_maksimal : 1;
+        // Pastikan mengembalikan angka, minimal 1 jika kosong
+        const pekanMaksimal = (row && row.pekan_maksimal) ? Number(row.pekan_maksimal) : 1;
         res.json({ pekan_aktif: pekanMaksimal });
     });
 });
