@@ -242,3 +242,13 @@ app.put('/api/target/:id/edit', verifyToken, (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/login.html');
 });
+
+// Endpoint untuk melihat semua data user
+app.get('/api/users', (req, res) => {
+  db.all("SELECT id, nama_lengkap, username, role FROM users", [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
