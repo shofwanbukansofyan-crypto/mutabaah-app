@@ -146,6 +146,12 @@
                     const tbody = document.getElementById('tabelDetailHarian');
                     tbody.innerHTML = '';
 
+                    // ----------------------------------------------------
+                    // TEMPATKAN DI SINI: Urutkan hari dari Senin sampai Ahad
+                    // ----------------------------------------------------
+                    const urutanHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
+                    data.harian.sort((a, b) => urutanHari.indexOf(a.hari) - urutanHari.indexOf(b.hari));
+
                     data.harian.forEach(row => {
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-[#f0ebd8]/50 transition-colors bg-[#fdfbf7]";
