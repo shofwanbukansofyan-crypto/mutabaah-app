@@ -55,7 +55,7 @@
 
         // Ambil daftar murid buat dropdown
         async function loadMurid() {
-            const res = await fetch('http://localhost:3000/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             const select = document.getElementById('pilihMurid');
             select.innerHTML = '<option value="" disabled selected>- Pilih Siswa -</option>';
@@ -75,7 +75,7 @@
 
             container.innerHTML = '<p class="text-center">Mencari data...</p>';
 
-            const res = await fetch(`http://localhost:3000/api/target?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
+            const res = await fetch(`/api/target`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -113,7 +113,7 @@
             const inputBaru = document.getElementById(`edit-isi-${id}`).value;
             
             try {
-                const res = await fetch(`http://localhost:3000/api/target/${id}/edit`, {
+                const res = await fetch(`/api/target`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ isi_target: inputBaru })

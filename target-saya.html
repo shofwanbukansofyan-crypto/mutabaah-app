@@ -43,7 +43,7 @@
 
         async function loadTargetSaya() {
             const pekan = document.getElementById('filterPekan').value;
-            const res = await fetch(`http://localhost:3000/api/target?pekan_ke=${pekan}`, {
+            const res = await fetch(`/api/target`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -77,7 +77,7 @@
 
         async function updateStatus(id, status) {
             const status_selesai = status ? 1 : 0;
-            await fetch(`http://localhost:3000/api/target/${id}/status`, {
+            await fetch(`/api/target`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ status_selesai })
