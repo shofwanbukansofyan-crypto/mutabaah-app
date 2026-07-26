@@ -73,9 +73,17 @@
                 const res = await fetch(`/api/target?pekan_ke=${pekan}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                
+                // Jika server merespons error, hentikan dan tampilkan info
+                if (!res.ok) {
+                    container.innerHTML = `<p class="text-center text-red-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
+                    updateProgress(0, 0);
+                    return;
+                }
+
                 const data = await res.json();
 
-                if (!res.ok || data.length === 0) {
+                if (!Array.isArray(data) || data.length === 0) {
                     container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
                     updateProgress(0, 0);
                     return;
@@ -111,10 +119,34 @@
                 updateProgress(selesaiCount, data.length);
             } catch (err) {
                 console.error("Gagal memuat target:", err);
-                container.innerHTML = `<p class="text-center text-red-500 italic py-6">Gagal memuat data dari server.</p>`;
+                container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
+                updateProgress(0, 0);
             }
         }
-        
+
+        async function cekPekanAktif() {
+            try {
+                const res = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
+                        
+                        const labelPekan = document.getElementById('labelPekanAktif');
+                        if (labelPekan) {
+                            labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
+                        }
+                        
+                        document.getElementById('filterPekan').value = pekanMaksimal;
+                    }
+                }
+                loadTargetSaya();
+            } catch (err) {
+                console.error("Gagal mendeteksi pekan aktif:", err);
+                loadTargetSaya();
+            }
+        }
+
         async function cekPekanAktif() {
             try {
                 // Ambil semua target milik siswa tanpa filter pekan untuk mendeteksi nilai tertinggi
