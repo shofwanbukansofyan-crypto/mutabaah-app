@@ -70,7 +70,6 @@
             container.innerHTML = '<p class="text-center text-gray-500 italic">Memuat target...</p>';
 
             try {
-                // Pastikan endpoint mengirim parameter pekan_ke dengan benar
                 const res = await fetch(`/api/target?pekan_ke=${pekan}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -81,6 +80,10 @@
                     updateProgress(0, 0);
                     return;
                 }
+
+                // Urutkan hari dari Senin sampai Ahad
+                const urutanHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
+                data.sort((a, b) => urutanHari.indexOf(a.hari) - urutanHari.indexOf(b.hari));
 
                 let selesaiCount = 0;
                 container.innerHTML = '';
@@ -111,7 +114,7 @@
                 container.innerHTML = `<p class="text-center text-red-500 italic py-6">Gagal memuat data dari server.</p>`;
             }
         }
-
+        
         async function cekPekanAktif() {
             try {
                 // Ambil semua target milik siswa tanpa filter pekan untuk mendeteksi nilai tertinggi

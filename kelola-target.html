@@ -73,7 +73,6 @@
 
             container.innerHTML = '<p class="text-center">Mencari data...</p>';
 
-            // Mengirim query parameter murid_id dan pekan_ke ke backend
             const res = await fetch(`/api/target?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -83,6 +82,10 @@
                 container.innerHTML = `<p class="text-center text-red-500 font-bold py-4">Belum ada target di pekan ke-${pekanKe} untuk siswa ini.</p>`;
                 return;
             }
+
+            // Urutkan hari dari Senin sampai Ahad
+            const urutanHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
+            data.sort((a, b) => urutanHari.indexOf(a.hari) - urutanHari.indexOf(b.hari));
 
             container.innerHTML = '';
             data.forEach(item => {
