@@ -316,13 +316,17 @@ app.post('/api/target', verifyToken, (req, res) => {
 });
 
 // Siswa atau Guru melihat daftar target berdasarkan murid & pekan
+// Siswa atau Guru melihat daftar target berdasarkan murid & pekan
 app.get('/api/target', verifyToken, (req, res) => {
     const { murid_id, pekan_ke } = req.query;
     
+    // Jika yang login adalah murid, paksa gunakan ID miliknya sendiri
     let targetMuridId = req.user.role === 'murid' ? req.user.id : murid_id;
+
     let sql = `SELECT * FROM target_murojaah WHERE murid_id = ?`;
     let params = [targetMuridId];
 
+    // Jika ada filter pekan_ke, tambahkan ke query SQL
     if (pekan_ke) {
         sql += ` AND pekan_ke = ?`;
         params.push(pekan_ke);
