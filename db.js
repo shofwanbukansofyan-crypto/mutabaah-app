@@ -80,9 +80,9 @@ db.run(`CREATE TABLE IF NOT EXISTS ujian_kenaikan (
     murid_id INTEGER,
     guru_id INTEGER,
     jumlah_juz INTEGER,
-    daftar_juz TEXT, -- Disimpan format JSON, contoh: "[1,2,3,4,5]"
+    daftar_juz TEXT,
     waktu_mulai DATETIME,
-    status_ujian 'persiapan' | 'berlangsung' | 'selesai',
+    status_ujian TEXT DEFAULT 'persiapan',
     nilai_hifdz REAL DEFAULT 0,
     nilai_tajwid REAL DEFAULT 0,
     nilai_tartil REAL DEFAULT 0,
