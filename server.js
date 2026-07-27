@@ -314,6 +314,46 @@ app.post('/api/target', verifyToken, (req, res) => {
     });
 });
 
+// Endpoint khusus untuk mendeteksi pekan aktif santri yang diatur oleh guru
+app.get('/api/target/pekan-aktif', verifyToken, (req, res) => {
+    const murid_id = req.user.role === 'murid' ? req.user.id : req.query.murid_id;
+    
+    if (!murid_id) return res.status(400).json({ error: "ID murid diperlukan." });
+
+    const sql = `SELECT pekan_aktif FROM pengaturan_santri WHERE murid_id = ?`;
+    db.get(sql, [murid_id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        // Jika belum diatur guru, fallback cari MAX(pekan_ke) dari target atau default 1
+        if (!row) {
+            db.get(`SELECT MAX(pekan_ke) as max_pekan FROM target_murojaah WHERE murid_id = ?`, [murid_id], (err2, rowMax) => {
+                const defaultPekan = (rowMax && rowMax.max_pekan) ? Number(rowMax.max_pekan) : 1;
+                res.json({ pekan_aktif: defaultPekan });
+            });
+        } else {
+            res.json({ pekan_aktif: Number(row.pekan_aktif) });
+        }
+    });
+});
+
+// Endpoint Guru mengatur Pekan Aktif untuk seorang santri
+app.put('/api/target/set-pekan-aktif', verifyToken, (req, res) => {
+    if (req.user.role !== 'guru') {
+        return res.status(403).json({ error: "Akses ditolak! Hanya Guru yang bisa mengatur pekan aktif." });
+    }
+    const { murid_id, pekan_aktif } = req.body;
+    if (!murid_id || !pekan_aktif) {
+        return res.status(400).json({ error: "Data murid dan pekan aktif harus diisi!" });
+    }
+
+    const sql = `INSERT INTO pengaturan_santri (murid_id, pekan_aktif) VALUES (?, ?) 
+                 ON CONFLICT(murid_id) DO UPDATE SET pekan_aktif = ?`;
+    db.run(sql, [murid_id, pekan_aktif, pekan_aktif], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Alhamdulillah, Pekan aktif santri berhasil diperbarui!" });
+    });
+});
+
 // PENTING: Letakkan endpoint khusus /pekan-aktif DI ATAS rute umum /api/target
 // Endpoint khusus untuk mendeteksi pekan maksimal aktif milik siswa
 app.get('/api/target/pekan-aktif', verifyToken, (req, res) => {

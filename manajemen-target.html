@@ -71,7 +71,7 @@
                     </select>
                 </div>
                 <div class="w-full md:w-56">
-                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Tentukan Pekan Aktif:</label>
+                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Pekan Ke-:</label>
                     <input type="number" id="inputPekanBaru" value="1" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold text-sm">
                     <span id="infoPekanTerakhir" class="text-xs text-gray-600 italic block mt-1">Pekan terakhir: -</span>
                 </div>
@@ -95,17 +95,21 @@
                         <option value="" disabled selected>- Memuat Santri -</option>
                     </select>
                 </div>
-                <div class="w-full md:w-56">
-                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Pekan Aktif / Ditampilkan:</label>
+                <div class="w-full md:w-64">
+                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Atur Pekan Aktif Santri:</label>
                     <div class="flex gap-2">
                         <input type="number" id="inputPekanKelola" value="1" class="flex-1 border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold outline-none text-sm">
-                        <button onclick="updatePekanAktifGuru()" class="bg-[#c5a059] text-[#113f59] font-bold px-3 py-2 rounded shadow hover:bg-yellow-600 hover:text-white text-xs whitespace-nowrap">
+                        <button onclick="updatePekanAktifGuru()" class="bg-[#113f59] text-white font-bold px-3 py-2 rounded shadow hover:bg-[#0c2d40] text-xs whitespace-nowrap">
                             Set Pekan Aktif
                         </button>
                     </div>
                     <span id="infoPekanAktifKelola" class="text-xs text-gray-600 italic block mt-1">Pekan aktif saat ini: -</span>
                 </div>
-                <button onclick="cariTargetKelola()" class="w-full md:w-auto bg-[#113f59] text-white font-bold px-6 py-2 rounded shadow hover:bg-[#0c2d40] border border-[#c5a059] h-[40px] text-sm">
+                <div class="w-32">
+                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Pekan Diedit:</label>
+                    <input type="number" id="inputPekanEditTarget" value="1" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold outline-none text-sm">
+                </div>
+                <button onclick="cariTargetKelola()" class="w-full md:w-auto bg-[#c5a059] text-[#113f59] font-bold px-6 py-2 rounded shadow hover:bg-yellow-600 hover:text-white border border-[#c5a059] h-[40px] text-sm">
                     Cari Target
                 </button>
             </div>
@@ -249,13 +253,13 @@
         async function cekPekanAktifSantri() {
             try {
                 const res = await fetch(`/api/target/pekan-aktif`, { headers: { 'Authorization': `Bearer ${token}` } });
-                let pekanMaksimal = 1;
+                let pekanAktif = 1;
                 if (res.ok) {
                     const data = await res.json();
-                    pekanMaksimal = data.pekan_aktif || 1;
+                    pekanAktif = data.pekan_aktif || 1;
                 }
-                document.getElementById('labelPekanAktif').innerText = `Pekan ke-${pekanMaksimal}`;
-                document.getElementById('filterPekanSantri').value = pekanMaksimal;
+                document.getElementById('labelPekanAktif').innerText = `Pekan ke-${pekanAktif}`;
+                document.getElementById('filterPekanSantri').value = pekanAktif;
                 loadTargetSantri();
             } catch (err) {
                 loadTargetSantri();
@@ -317,7 +321,7 @@
             });
         }
 
-        // Auto deteksi pekan aktif / terakhir saat santri dipilih di form input baru
+        // Auto deteksi pekan terakhir saat santri dipilih di form input baru
         document.getElementById('pilihMuridInput').addEventListener('change', async function() {
             const muridId = this.value;
             if (!muridId) return;
@@ -327,7 +331,7 @@
                 const inputPekan = document.getElementById('inputPekanBaru');
                 if (data && data.length > 0) {
                     const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
-                    inputPekan.value = pekanMaksimal + 1; // Guru bebas mengubahnya
+                    inputPekan.value = pekanMaksimal + 1;
                     document.getElementById('infoPekanTerakhir').innerText = `Pekan terakhir: ${pekanMaksimal}`;
                 } else {
                     inputPekan.value = 1;
@@ -343,23 +347,23 @@
             const muridId = this.value;
             if (!muridId) return;
             try {
-                const res = await fetch(`/api/target?murid_id=${muridId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch(`/api/target/pekan-aktif?murid_id=${muridId}`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
+                
                 const inputPekanKelola = document.getElementById('inputPekanKelola');
-                if (data && data.length > 0) {
-                    const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
-                    inputPekanKelola.value = pekanMaksimal;
-                    document.getElementById('infoPekanAktifKelola').innerText = `Pekan aktif saat ini: ${pekanMaksimal}`;
-                } else {
-                    inputPekanKelola.value = 1;
-                    document.getElementById('infoPekanAktifKelola').innerText = `Belum ada target`;
+                const inputPekanEditTarget = document.getElementById('inputPekanEditTarget');
+
+                if (res.ok) {
+                    inputPekanKelola.value = data.pekan_aktif;
+                    inputPekanEditTarget.value = data.pekan_aktif;
+                    document.getElementById('infoPekanAktifKelola').innerText = `Pekan aktif saat ini: ${data.pekan_aktif}`;
                 }
             } catch (err) {
                 console.error(err);
             }
         });
 
-        // Fungsi Guru memperbarui Pekan Aktif santri melalui endpoint /pekan-aktif (atau disimpan sebagai target acuan)
+        // Fungsi Guru memperbarui Pekan Aktif santri
         async function updatePekanAktifGuru() {
             const muridId = document.getElementById('pilihMuridKelola').value;
             const pekanBaru = document.getElementById('inputPekanKelola').value;
@@ -373,7 +377,7 @@
                 });
                 const result = await res.json();
                 if (res.ok) {
-                    alert('Pekan aktif santri berhasil diperbarui!');
+                    alert(result.message);
                     document.getElementById('infoPekanAktifKelola').innerText = `Pekan aktif saat ini: ${pekanBaru}`;
                 } else {
                     alert('Gagal: ' + result.error);
@@ -418,7 +422,7 @@
 
         async function cariTargetKelola() {
             const muridId = document.getElementById('pilihMuridKelola').value;
-            const pekanKe = document.getElementById('inputPekanKelola').value;
+            const pekanKe = document.getElementById('inputPekanEditTarget').value;
             const container = document.getElementById('listEditTarget');
             const containerAksi = document.getElementById('containerAksiPekan');
 

@@ -64,17 +64,13 @@ db.serialize(() => {
         FOREIGN KEY (murid_id) REFERENCES users (id)
     )`);
 
-    // Memasukkan Data Dummy untuk Testing Login
-    db.run(`INSERT OR IGNORE INTO users (id, nama_lengkap, username, password, role) 
-            VALUES (1, 'Ustadz Ahmad', 'guru1', '123456', 'guru')`);
+    db.run(`CREATE TABLE IF NOT EXISTS pengaturan_santri (
+    murid_id INTEGER PRIMARY KEY,
+    pekan_aktif INTEGER DEFAULT 1,
+    FOREIGN KEY(murid_id) REFERENCES users(id)
+)`);
     
-    db.run(`INSERT OR IGNORE INTO users (id, nama_lengkap, username, password, role, guru_id) 
-            VALUES (2, 'Zpin', 'siswa1', '123456', 'murid', 1)`);
-    
-    console.log('Skema tabel lengkap dan data testing berhasil disiapkan.');
-});
-
-// Tabel Sesi Ujian Kenaikan Juz
+    // Tabel Sesi Ujian Kenaikan Juz
 db.run(`CREATE TABLE IF NOT EXISTS ujian_kenaikan (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     murid_id INTEGER,
@@ -103,5 +99,15 @@ db.run(`CREATE TABLE IF NOT EXISTS kertas_tasmi (
     mustami TEXT,      -- Teks input nama penyimak
     FOREIGN KEY(ujian_id) REFERENCES ujian_kenaikan(id)
 )`);
+
+// Memasukkan Data Dummy untuk Testing Login
+db.run(`INSERT OR IGNORE INTO users (id, nama_lengkap, username, password, role) 
+        VALUES (1, 'Ustadz Ahmad', 'guru1', '123456', 'guru')`);
+
+db.run(`INSERT OR IGNORE INTO users (id, nama_lengkap, username, password, role, guru_id) 
+        VALUES (2, 'Zpin', 'siswa1', '123456', 'murid', 1)`);
+
+console.log('Skema tabel lengkap dan data testing berhasil disiapkan.');
+});
 
 module.exports = db;
