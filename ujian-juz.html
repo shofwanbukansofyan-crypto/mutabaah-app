@@ -52,7 +52,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059]">
                 <div>
                     <p class="font-bold text-[#113f59]">Status Ujian: <span id="labelStatus" class="text-green-600 uppercase font-bold">-</span></p>
-                    <p class="text-sm text-gray-700 mt-1">Jumlah Target Juz: <span id="labelDaftarJuz" class="font-bold text-[#c5a059]">-</span></p>
+                    <p class="text-sm text-gray-700 mt-1">Jumlah Juz: <span id="labelDaftarJuz" class="font-bold text-[#c5a059]">-</span></p>
                 </div>
                 <div class="mt-3 md:mt-0 text-center bg-white px-4 py-2 rounded border border-[#c5a059] shadow-inner">
                     <span class="text-xs font-bold text-gray-500 block">Durasi Ujian:</span>
@@ -62,17 +62,17 @@
 
             <!-- KERTAS TASMI' (Tabel Utama) -->
             <div class="bg-white p-4 rounded-lg border border-[#c5a059] overflow-x-auto">
-                <h3 class="font-bold text-[#113f59] mb-3 text-lg text-center">Kertas Tasmi' Ujian</h3>
+                <h3 class="font-bold text-[#113f59] mb-3 text-lg text-center">Kertas Tasmi'</h3>
                 <table class="w-full border-collapse border border-[#c5a059] text-center bg-white text-sm">
                     <thead>
                         <tr class="bg-[#113f59] text-white">
-                            <th class="border border-[#c5a059] p-2">Mustami'</th>
-                            <th class="border border-[#c5a059] p-2">Maqbul / Mardud</th>
-                            <th class="border border-[#c5a059] p-2">Taqdir</th>
-                            <th class="border border-[#c5a059] p-2">Khoto'</th>
-                            <th class="border border-[#c5a059] p-2">Tanbih</th>
+                            <th class="border border-[#c5a059] p-2">مستمع</th>
+                            <th class="border border-[#c5a059] p-2">مقبول/مردود</th>
+                            <th class="border border-[#c5a059] p-2">تقدير</th>
+                            <th class="border border-[#c5a059] p-2">خطأ</th>
+                            <th class="border border-[#c5a059] p-2">تنبيه</th>
                             <th class="border border-[#c5a059] p-2">Juz</th>
-                            <th class="border border-[#c5a059] p-2">No</th>
+                            <th class="border border-[#c5a059] p-2">رقم</th>
                         </tr>
                     </thead>
                     <tbody id="tabelKertasTasmi">
@@ -115,11 +115,11 @@
                 <table class="w-full border-collapse border border-[#c5a059] text-center text-sm">
                     <thead>
                         <tr class="bg-[#113f59] text-white">
-                            <th class="border border-[#c5a059] p-2">No</th>
-                            <th class="border border-[#c5a059] p-2">Nama Santri</th>
-                            <th class="border border-[#c5a059] p-2">Jumlah Juz</th>
-                            <th class="border border-[#c5a059] p-2">Nilai Akhir</th>
-                            <th class="border border-[#c5a059] p-2">Aksi</th>
+                            <th class="border border-[#c5a059] p-2">رقم</th>
+                            <th class="border border-[#c5a059] p-2">اسم الطالب</th>
+                            <th class="border border-[#c5a059] p-2">عدد الأجزاء</th>
+                            <th class="border border-[#c5a059] p-2">النتيجة النهائية</th>
+                            <th class="border border-[#c5a059] p-2">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="tabelRiwayatUjian">
@@ -206,7 +206,7 @@
                 panelUjian.classList.remove('hidden');
 
                 document.getElementById('labelStatus').innerText = data.ujian.status_ujian;
-                document.getElementById('labelDaftarJuz').innerText = `${data.ujian.jumlah_juz} Juz (+5 Cadangan)`;
+                document.getElementById('labelDaftarJuz').innerText = `${data.ujian.jumlah_juz} Juz `;
 
                 // Mulai Timer Durasi
                 mulaiTimer(new Date(data.ujian.waktu_mulai));
@@ -220,37 +220,37 @@
 
                     tbody.innerHTML += `
                         <tr class="hover:bg-[#f0ebd8]/40">
-                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="mustami_${row.id}" value="${row.mustami || ''}" onchange="updateTasmiManual(${row.id})" class="w-full border rounded px-2 mustami bg-transparent" placeholder="Nama penyimak"></td>
+                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="مستمع_${row.id}" value="${row.مستمع || ''}" onchange="updateTasmiManual(${row.id})" class="w-full border rounded px-2 مستمع bg-transparent" placeholder="الأخ/الأستاذ"></td>
                             <td class="border border-[#c5a059] p-1">
                                 <select ${isReadonly} id="status_${row.id}" onchange="updateTasmiManual(${row.id})" class="status border rounded p-1 bg-transparent w-full">
-                                    <option value="">- Pilih -</option>
-                                    <option value="maqbul" ${row.status_kelulusan==='maqbul'?'selected':''}>Maqbul</option>
-                                    <option value="mardud" ${row.status_kelulusan==='mardud'?'selected':''}>Mardud</option>
+                                    <option value="">- مقبول -</option>
+                                    <option value="مقبول" ${row.حالة==='مقبول'?'selected':''}>مقبول</option>
+                                    <option value="مردود" ${row.حالة==='مردود'?'selected':''}>مردود</option>
                                 </select>
                             </td>
                             <td class="border border-[#c5a059] p-1">
-                                <select ${isReadonly} id="taqdir_${row.id}" onchange="updateTasmiManual(${row.id})" class="taqdir border rounded p-1 bg-transparent w-full">
-                                    <option value="">- Pilih -</option>
-                                    <option value="mumtaz" ${row.taqdir==='mumtaz'?'selected':''}>Mumtaz</option>
-                                    <option value="jayyid_jiddan" ${row.taqdir==='jayyid_jiddan'?'selected':''}>Jayyid Jiddan</option>
-                                    <option value="jayyid" ${row.taqdir==='jayyid'?'selected':''}>Jayyid</option>
+                                <select ${isReadonly} id="تقدير_${row.id}" onchange="updateTasmiManual(${row.id})" class="تقدير border rounded p-1 bg-transparent w-full">
+                                    <option value="">- ممتاز -</option>
+                                    <option value="ممتاز" ${row.تقدير==='ممتاز'?'selected':''}>ممتاز</option>
+                                    <option value="جيد جدا" ${row.تقدير==='جيد جدا'?'selected':''}>جيد جدا</option>
+                                    <option value="جيد" ${row.تقدير==='جيد'?'selected':''}>جيد</option>
                                 </select>
                             </td>
                             <td class="border border-[#c5a059] p-1">
                                 <div class="flex items-center justify-center space-x-1">
-                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'khoto', -1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">-</button>
-                                    <input type="number" ${isReadonly} id="khoto_${row.id}" value="${row.khoto}" onchange="updateTasmiManual(${row.id})" class="w-12 text-center border rounded khoto bg-transparent">
-                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'khoto', 1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">+</button>
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'خطأ', -1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">-</button>
+                                    <input type="number" ${isReadonly} id="خطأ_${row.id}" value="${row.خطأ}" onchange="updateTasmiManual(${row.id})" class="w-12 text-center border rounded خطأ bg-transparent">
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'خطأ', 1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">+</button>
                                 </div>
                             </td>
                             <td class="border border-[#c5a059] p-1">
                                 <div class="flex items-center justify-center space-x-1">
-                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'tanbih', -1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">-</button>
-                                    <input type="number" ${isReadonly} id="tanbih_${row.id}" value="${row.tanbih}" onchange="updateTasmiManual(${row.id})" class="w-12 text-center border rounded tanbih bg-transparent">
-                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'tanbih', 1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">+</button>
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'تنبيه', -1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">-</button>
+                                    <input type="number" ${isReadonly} id="تنبيه_${row.id}" value="${row.تنبيه}" onchange="updateTasmiManual(${row.id})" class="w-12 text-center border rounded تنبيه bg-transparent">
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'تنبيه', 1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">+</button>
                                 </div>
                             </td>
-                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="juz_teks_${row.id}" value="${row.juz_teks || ''}" onchange="updateTasmiManual(${row.id})" class="w-20 text-center border rounded juz_teks bg-transparent font-semibold text-[#113f59]" placeholder="Cth: 1"></td>
+                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="جزء_نص_${row.id}" value="${row.جزء_نص || ''}" onchange="updateTasmiManual(${row.id})" class="w-20 text-center border rounded جزء_نص bg-transparent font-semibold text-[#113f59]" placeholder=" جزء ١ "></td>
                             <td class="border border-[#c5a059] p-2 font-bold">${nomorUrut}</td>
                         </tr>
                     `;
@@ -294,12 +294,12 @@
         async function updateTasmiManual(id) {
             if (role === 'guru') return;
             const body = {
-                tanbih: document.getElementById(`tanbih_${id}`).value,
-                khoto: document.getElementById(`khoto_${id}`).value,
-                taqdir: document.getElementById(`taqdir_${id}`).value,
-                status_kelulusan: document.getElementById(`status_${id}`).value,
-                mustami: document.getElementById(`mustami_${id}`).value,
-                juz_teks: document.getElementById(`juz_teks_${id}`).value
+                تنبيه: document.getElementById(`تنبيه_${id}`).value,
+                خطأ: document.getElementById(`خ_${id}`).value,
+                تقدير: document.getElementById(`تقدير_${id}`).value,
+                حالة: document.getElementById(`حالة_${id}`).value,
+                مستمع: document.getElementById(`مستمع_${id}`).value,
+                جزء_نص: document.getElementById(`جزء_نص_${id}`).value
             };
             await fetch(`/api/ujian/tasmi/${id}`, {
                 method: 'PUT',
@@ -369,29 +369,29 @@
                     <p><strong>Nilai Hifdz:</strong> ${u.nilai_hifdz} | <strong>Tajwid:</strong> ${u.nilai_tajwid} | <strong>Tartil:</strong> ${u.nilai_tartil}</p>
                     <p><strong>Nilai Akhir (Rata-rata):</strong> <span class="text-green-600 font-bold">${Number(u.nilai_akhir).toFixed(2)}</span></p>
                     <hr class="my-2">
-                    <h4 class="font-bold text-[#113f59] text-center">Kertas Tasmi' Selesai</h4>
+                    <h4 class="font-bold text-[#113f59] text-center">بطاقة التسميع Selesai</h4>
                     <table class="w-full border-collapse border text-center text-xs mt-2">
                         <tr class="bg-[#113f59] text-white">
-                            <th class="border p-1">Mustami'</th>
-                            <th class="border p-1">Maqbul/Mardud</th>
-                            <th class="border p-1">Taqdir</th>
-                            <th class="border p-1">Khoto'</th>
-                            <th class="border p-1">Tanbih</th>
+                            <th class="border p-1">مستمع</th>
+                            <th class="border p-1">مقبول/مردود</th>
+                            <th class="border p-1">تقدير</th>
+                            <th class="border p-1">خطأ</th>
+                            <th class="border p-1">تنبيه</th>
                             <th class="border p-1">Juz</th>
-                            <th class="border p-1">No</th>
+                            <th class="border p-1">رقم</th>
                         </tr>
                 `;
                 
                 data.tasmi.forEach((t, idx) => {
-                    const noModal = idx + 1;
+                    const رقمModal = idx + 1;
                     html += `
                         <tr>
-                            <td class="border p-1">${t.mustami || '-'}</td>
-                            <td class="border p-1">${t.status_kelulusan || '-'}</td>
-                            <td class="border p-1">${t.taqdir || '-'}</td>
-                            <td class="border p-1">${t.khoto}</td>
-                            <td class="border p-1">${t.tanbih}</td>
-                            <td class="border p-1 font-semibold">${t.juz_teks || '-'}</td>
+                            <td class="border p-1">${t.مستمع || '-'}</td>
+                            <td class="border p-1">${t.حالة || '-'}</td>
+                            <td class="border p-1">${t.تقدير || '-'}</td>
+                            <td class="border p-1">${t.خطأ}</td>
+                            <td class="border p-1">${t.تنبيه}</td>
+                            <td class="border p-1 font-semibold">${t.جزء_نص || '-'}</td>
                             <td class="border p-1">${noModal}</td>
                         </tr>
                     `;
