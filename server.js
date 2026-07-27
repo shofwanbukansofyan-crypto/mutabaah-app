@@ -366,6 +366,7 @@ app.put('/api/target/:id/edit', verifyToken, (req, res) => {
 });
 
 // Siswa memperbarui status centang target harian
+// Siswa memperbarui status centang target harian (dengan validasi isi target tidak boleh kosong)
 app.put('/api/target/:id/status', verifyToken, (req, res) => {
     if (req.user.role !== 'murid') {
         return res.status(403).json({ error: "Akses ditolak! Hanya siswa yang bisa mengubah status target." });
@@ -374,10 +375,20 @@ app.put('/api/target/:id/status', verifyToken, (req, res) => {
     const targetId = req.params.id;
     const { status_selesai } = req.body;
 
-    const sql = `UPDATE target_murojaah SET status_selesai = ? WHERE id = ? AND murid_id = ?`;
-    db.run(sql, [status_selesai, targetId, req.user.id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: "Status target berhasil diperbarui!" });
+    // Cek dulu apakah isi_target kosong atau bernilai '-'
+    const checkSql = `SELECT isi_target FROM target_muroja_ah WHERE id = ? AND murid_id = ?`; // Sesuaikan nama tabel jika perlu
+    db.get(`SELECT isi_target FROM target_murojaah WHERE id = ? AND murid_id = ?`, [targetId, req.user.id], (err, row) => {
+        if (err || !row) return res.status(404).json({ error: "Target tidak ditemukan." });
+
+        if (!row.isi_target || row.isi_target.trim() === '' || row.isi_target.trim() === '-') {
+            return res.status(400).json({ error: "Target kosong tidak dapat dicentang!" });
+        }
+
+        const sql = `UPDATE target_murojaah SET status_selesai = ? WHERE id = ? AND murid_id = ?`;
+        db.run(sql, [status_selesai, targetId, req.user.id], function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: "Status target berhasil diperbarui!" });
+        });
     });
 });
 
