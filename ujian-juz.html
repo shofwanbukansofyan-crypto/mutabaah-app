@@ -58,16 +58,16 @@
             </div>
 
             <div class="bg-white p-4 rounded-lg border border-[#c5a059] overflow-x-auto">
-                <h3 class="font-bold text-[#113f59] mb-3 text-lg">Kertas Tasmi' Ujian</h3>
+                <h3 class="font-bold text-[#113f59] mb-3 text-lg">بطاقة التسميع</h3>
                 <table class="w-full border-collapse border border-[#c5a059] text-center bg-white text-sm">
                     <thead>
                         <tr class="bg-[#113f59] text-white">
-                            <th class="border border-[#c5a059] p-2">No</th>
-                            <th class="border border-[#c5a059] p-2">Tanbih</th>
-                            <th class="border border-[#c5a059] p-2">Khoto'</th>
-                            <th class="border border-[#c5a059] p-2">Taqdir</th>
-                            <th class="border border-[#c5a059] p-2">Maqbul / Mardud</th>
-                            <th class="border border-[#c5a059] p-2">Mustami'</th>
+                            <th class="border border-[#c5a059] p-2">رقم</th>
+                            <th class="border border-[#c5a059] p-2">تنبيه</th>
+                            <th class="border border-[#c5a059] p-2">خطأ</th>
+                            <th class="border border-[#c5a059] p-2">تقدير</th>
+                            <th class="border border-[#c5a059] p-2">مقبول / مردود</th>
+                            <th class="border border-[#c5a059] p-2">مستمع</th>
                         </tr>
                     </thead>
                     <tbody id="tabelKertasTasmi">
@@ -212,24 +212,24 @@
                     tbody.innerHTML += `
                         <tr class="hover:bg-[#f0ebd8]/40">
                             <td class="border border-[#c5a059] p-2 font-bold">${row.nomor}</td>
-                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.tanbih}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded tanbih bg-transparent"></td>
-                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.khoto}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded khoto bg-transparent"></td>
+                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.تنبيه}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded تنبيه bg-transparent"></td>
+                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.خطأ}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded خطأ bg-transparent"></td>
                             <td class="border border-[#c5a059] p-1">
-                                <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="taqdir border rounded p-1 bg-transparent w-full">
+                                <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="تقدير border rounded p-1 bg-transparent w-full">
                                     <option value="">- Pilih -</option>
-                                    <option value="mumtaz" ${row.taqdir==='mumtaz'?'selected':''}>Mumtaz</option>
-                                    <option value="jayyid_jiddan" ${row.taqdir==='jayyid_jiddan'?'selected':''}>Jayyid Jiddan</option>
-                                    <option value="jayyid" ${row.taqdir==='jayyid'?'selected':''}>Jayyid</option>
+                                    <option value="ممتاز" ${row.تقدير==='ممتاز'?'selected':''}>ممتاز</option>
+                                    <option value="جيد جدا" ${row.تقدير==='جيد جدا'?'selected':''}>جيد جدا</option>
+                                    <option value="جيد" ${row.تقدير==='جيد'?'selected':''}>جيد</option>
                                 </select>
                             </td>
                             <td class="border border-[#c5a059] p-1">
                                 <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="status border rounded p-1 bg-transparent w-full">
                                     <option value="">- Pilih -</option>
-                                    <option value="maqbul" ${row.status_kelulusan==='maqbul'?'selected':''}>Maqbul</option>
-                                    <option value="mardud" ${row.status_kelulusan==='mardud'?'selected':''}>Mardud</option>
+                                    <option value="مقبول" ${row.status_kelulusan==='مقبول'?'selected':''}>مقبول</option>
+                                    <option value="مردود" ${row.status_kelulusan==='مردود'?'selected':''}>مردود</option>
                                 </select>
                             </td>
-                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} value="${row.mustami || ''}" onchange="updateTasmi(${row.id}, this)" class="w-full border rounded px-2 mustami bg-transparent" placeholder="Nama penyimak"></td>
+                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} value="${row.مستمع || ''}" onchange="updateTasmi(${row.id}, this)" class="w-full border rounded px-2 مستمع bg-transparent" placeholder="الأخ/الأستاذ"></td>
                         </tr>
                     `;
                 });
@@ -263,11 +263,11 @@
             if (role === 'guru') return;
             const tr = element.closest('tr');
             const body = {
-                tanbih: tr.querySelector('.tanbih').value,
-                khoto: tr.querySelector('.khoto').value,
-                taqdir: tr.querySelector('.taqdir').value,
+                تنبيه: tr.querySelector('.تنبيه').value,
+                خطأ: tr.querySelector('.خطأ').value,
+                تقدير: tr.querySelector('.تقدير').value,
                 status_kelulusan: tr.querySelector('.status').value,
-                mustami: tr.querySelector('.mustami').value
+                مستمع: tr.querySelector('.مستمع').value
             };
             await fetch(`/api/ujian/tasmi/${id}`, {
                 method: 'PUT',
@@ -340,23 +340,23 @@
                     <h4 class="font-bold text-[#113f59]">Kertas Tasmi' Selesai:</h4>
                     <table class="w-full border-collapse border text-center text-xs mt-2">
                         <tr class="bg-[#113f59] text-white">
-                            <th class="border p-1">No</th>
-                            <th class="border p-1">Tanbih</th>
-                            <th class="border p-1">Khoto'</th>
-                            <th class="border p-1">Taqdir</th>
-                            <th class="border p-1">Maqbul/Mardud</th>
-                            <th class="border p-1">Mustami'</th>
+                            <th class="border p-1">رقم</th>
+                            <th class="border p-1">تنبيه</th>
+                            <th class="border p-1">خطأ</th>
+                            <th class="border p-1">تقدير</th>
+                            <th class="border p-1">مقبول/مردود</th>
+                            <th class="border p-1">مستمع</th>
                         </tr>
                 `;
                 data.tasmi.forEach(t => {
                     html += `
                         <tr>
                             <td class="border p-1">${t.nomor}</td>
-                            <td class="border p-1">${t.tanbih}</td>
-                            <td class="border p-1">${t.khoto}</td>
-                            <td class="border p-1">${t.taqdir || '-'}</td>
+                            <td class="border p-1">${t.تنبيه}</td>
+                            <td class="border p-1">${t.خطأ}</td>
+                            <td class="border p-1">${t.تقدير || '-'}</td>
                             <td class="border p-1">${t.status_kelulusan || '-'}</td>
-                            <td class="border p-1">${t.mustami || '-'}</td>
+                            <td class="border p-1">${t.مستمع || '-'}</td>
                         </tr>
                     `;
                 });
