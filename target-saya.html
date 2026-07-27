@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Target Muroja'ah Saya - Santri</title>
+    <title>Manajemen Target Muroja'ah - Sistem Mutaba'ah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -15,56 +15,163 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-8 font-serif">
+<body class="p-2 md:p-8 font-serif">
 
-    <div class="max-w-3xl mx-auto bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
+    <div class="max-w-4xl mx-auto bg-white/95 p-4 md:p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
         
+        <!-- Header Navigasi -->
         <div class="flex justify-between items-center mb-6 border-b-2 border-[#c5a059] pb-4">
-            <a href="menu-utama.html" class="text-[#113f59] font-bold hover:underline">&larr; Menu Utama</a>
-            <h1 class="text-2xl font-bold text-[#113f59]">Target Muroja'ah Pekanan</h1>
-            <div class="w-20"></div>
+            <a href="menu-utama.html" class="text-[#113f59] font-bold hover:underline text-sm md:text-base">&larr; Menu Utama</a>
+            <h1 class="text-xl md:text-2xl font-bold text-[#113f59] text-center">Target Muroja'ah</h1>
+            <div class="w-16 md:w-20"></div>
         </div>
 
-        <!-- Indikator Pekan Aktif & Progress Bar -->
-<div class="mb-6 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
-    <div class="flex justify-between items-center mb-2">
-        <span class="font-bold text-[#113f59]">Progres Pekan Ini:</span>
-        <span id="textProgres" class="font-bold text-[#c5a059]">0 / 0 Selesai (0%)</span>
-    </div>
-    <div class="w-full bg-gray-200 rounded-full h-3 border border-[#c5a059]/40 overflow-hidden">
-        <div id="progressBar" class="bg-[#113f59] h-full transition-all duration-300" style="width: 0%"></div>
-    </div>
-</div>
-
-        <div class="text-center mb-4">
-    <span class="bg-[#113f59] text-white text-xs px-3 py-1 rounded-full font-semibold">
-        📅 Pekan Aktif Saat Ini: <span id="labelPekanAktif" class="text-[#c5a059] font-bold">-</span>
-    </span>
-</div>
-
-        <div class="flex justify-center items-center gap-3 mb-6 bg-[#fdfbf7] p-3 rounded-lg border border-[#c5a059]">
-            <label class="font-bold text-[#113f59]">Pilih Pekan:</label>
-            <input type="number" id="filterPekan" value="1" class="w-20 border-2 border-[#c5a059] p-1 rounded text-center font-bold outline-none">
-            <button onclick="loadTargetSaya()" class="bg-[#c5a059] text-[#113f59] font-bold px-4 py-1 rounded shadow hover:bg-yellow-600 hover:text-white">Lihat</button>
+        <!-- NAVIGASI TAB (Tampil otomatis sesuai Role) -->
+        <div id="navTabContainer" class="flex border-b-2 border-[#c5a059] mb-6 overflow-x-auto">
+            <!-- Dirender via JS berdasarkan role -->
         </div>
 
-        <div id="listTarget" class="space-y-3">
-            <p class="text-center text-gray-500 italic">Memuat target...</p>
+        <!-- ================= SECTION 1: HALAMAN SANTRI (LIHAT & CENTANG TARGET) ================= -->
+        <div id="sectionSantri" class="hidden space-y-4">
+            <!-- Indikator Pekan Aktif & Progress Bar -->
+            <div class="bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-[#113f59] text-sm md:text-base">Progres Pekan Ini:</span>
+                    <span id="textProgres" class="font-bold text-[#c5a059] text-sm md:text-base">0 / 0 Selesai (0%)</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 border border-[#c5a059]/40 overflow-hidden">
+                    <div id="progressBar" class="bg-[#113f59] h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <span class="bg-[#113f59] text-white text-xs px-3 py-1 rounded-full font-semibold">
+                    📅 Pekan Aktif Saat Ini: <span id="labelPekanAktif" class="text-[#c5a059] font-bold">-</span>
+                </span>
+            </div>
+
+            <div class="flex flex-wrap justify-center items-center gap-3 bg-[#fdfbf7] p-3 rounded-lg border border-[#c5a059]">
+                <label class="font-bold text-[#113f59] text-sm">Pilih Pekan:</label>
+                <input type="number" id="filterPekanSantri" value="1" class="w-20 border-2 border-[#c5a059] p-1 rounded text-center font-bold outline-none text-sm">
+                <button onclick="loadTargetSantri()" class="bg-[#c5a059] text-[#113f59] font-bold px-4 py-1 rounded shadow hover:bg-yellow-600 hover:text-white text-sm">Lihat</button>
+            </div>
+
+            <div id="listTargetSantri" class="space-y-3">
+                <p class="text-center text-gray-500 italic">Memuat target...</p>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 2: HALAMAN GURU - BUAT TARGET BARU ================= -->
+        <div id="sectionInputGuru" class="hidden space-y-4">
+            <div class="flex flex-wrap gap-4 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Pilih Santri:</label>
+                    <select id="pilihMuridInput" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white outline-none text-sm">
+                        <option value="" disabled selected>- Memuat Santri -</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-48">
+                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Pekan Ke-:</label>
+                    <input type="number" id="inputPekanBaru" value="1" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold text-sm">
+                    <span id="infoPekanAktif" class="text-xs text-gray-600 italic block mt-1">Pekan aktif: -</span>
+                </div>
+            </div>
+
+            <div class="space-y-3" id="containerHariInput">
+                <!-- Form harian dirender dinamis -->
+            </div>
+
+            <button onclick="simpanTargetBaru()" class="w-full bg-[#113f59] text-white font-bold py-3 rounded shadow hover:bg-[#0c2d40] border border-[#c5a059] text-sm md:text-base">
+                Kirim Target ke Santri
+            </button>
+        </div>
+
+        <!-- ================= SECTION 3: HALAMAN GURU - KELOLA & EDIT TARGET ================= -->
+        <div id="sectionKelolaGuru" class="hidden space-y-4">
+            <div class="flex flex-wrap items-end gap-4 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Pilih Santri:</label>
+                    <select id="pilihMuridKelola" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white outline-none cursor-pointer text-sm">
+                        <option value="" disabled selected>- Memuat Santri -</option>
+                    </select>
+                </div>
+                <div class="w-32">
+                    <label class="block font-bold text-[#113f59] mb-1 text-sm">Pekan Ke-:</label>
+                    <input type="number" id="inputPekanKelola" value="1" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white text-center font-bold outline-none text-sm">
+                </div>
+                <button onclick="cariTargetKelola()" class="w-full md:w-auto bg-[#113f59] text-white font-bold px-6 py-2 rounded shadow hover:bg-[#0c2d40] border border-[#c5a059] h-[40px] text-sm">
+                    Cari Target
+                </button>
+            </div>
+
+            <div id="containerAksiPekan"></div>
+
+            <div id="listEditTarget" class="space-y-4">
+                <p class="text-center text-gray-500 italic py-8">Silakan pilih Santri dan pekan untuk menampilkan target.</p>
+            </div>
         </div>
 
     </div>
 
-  <script>
+    <script>
         const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
         if (!token) { window.location.href = 'login.html'; }
 
+        const daftarHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
+
         window.onload = function() {
-            cekPekanAktif();
+            setupNavigasi();
+            if (role === 'murid') {
+                bukaTab('santri');
+                cekPekanAktifSantri();
+            } else if (role === 'guru') {
+                bukaTab('input');
+                loadDaftarMuridSemua();
+                inisialisasiFormInput();
+            }
         };
 
-        async function loadTargetSaya() {
-            const pekan = document.getElementById('filterPekan').value;
-            const container = document.getElementById('listTarget');
+        // Render Navigasi Tab Sesuai Role
+        function setupNavigasi() {
+            const navContainer = document.getElementById('navTabContainer');
+            if (role === 'murid') {
+                navContainer.innerHTML = `
+                    <button onclick="bukaTab('santri')" id="tab-santri" class="flex-1 py-2 font-bold text-center border-b-4 border-[#113f59] text-[#113f59] bg-[#f0ebd8]/40 text-sm">Target & Progres Saya</button>
+                `;
+            } else if (role === 'guru') {
+                navContainer.innerHTML = `
+                    <button onclick="bukaTab('input')" id="tab-input" class="flex-1 py-2 font-bold text-center border-b-4 border-[#113f59] text-[#113f59] bg-[#f0ebd8]/40 text-sm">Buat Target Baru</button>
+                    <button onclick="bukaTab('kelola')" id="tab-kelola" class="flex-1 py-2 font-bold text-center border-b-4 border-transparent text-gray-500 text-sm">Kelola & Edit Target</button>
+                `;
+            }
+        }
+
+        function bukaTab(tabName) {
+            document.getElementById('sectionSantri').classList.add('hidden');
+            document.getElementById('sectionInputGuru').classList.add('hidden');
+            document.getElementById('sectionKelolaGuru').classList.add('hidden');
+
+            if (role === 'guru') {
+                document.getElementById('tab-input').className = "flex-1 py-2 font-bold text-center border-b-4 border-transparent text-gray-500 text-sm";
+                document.getElementById('tab-kelola').className = "flex-1 py-2 font-bold text-center border-b-4 border-transparent text-gray-500 text-sm";
+            }
+
+            if (tabName === 'santri') {
+                document.getElementById('sectionSantri').classList.remove('hidden');
+            } else if (tabName === 'input') {
+                document.getElementById('sectionInputGuru').classList.remove('hidden');
+                document.getElementById('tab-input').className = "flex-1 py-2 font-bold text-center border-b-4 border-[#113f59] text-[#113f59] bg-[#f0ebd8]/40 text-sm";
+            } else if (tabName === 'kelola') {
+                document.getElementById('sectionKelolaGuru').classList.remove('hidden');
+                document.getElementById('tab-kelola').className = "flex-1 py-2 font-bold text-center border-b-4 border-[#113f59] text-[#113f59] bg-[#f0ebd8]/40 text-sm";
+            }
+        }
+
+        // ================= LOGIKA HALAMAN SANTRI =================
+        async function loadTargetSantri() {
+            const pekan = document.getElementById('filterPekanSantri').value;
+            const container = document.getElementById('listTargetSantri');
             container.innerHTML = '<p class="text-center text-gray-500 italic">Memuat target...</p>';
 
             try {
@@ -79,107 +186,79 @@
                 }
 
                 const data = await res.json();
-
                 if (!Array.isArray(data) || data.length === 0) {
                     container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
                     updateProgress(0, 0);
                     return;
                 }
 
-                // Urutkan hari dari Senin sampai Ahad
-                const urutanHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
-                data.sort((a, b) => urutanHari.indexOf(a.hari) - urutanHari.indexOf(b.hari));
+                data.sort((a, b) => daftarHari.indexOf(a.hari) - daftarHari.indexOf(b.hari));
 
                 let selesaiCount = 0;
                 container.innerHTML = '';
                 
                 data.forEach(item => {
-    // Cek apakah target kosong, null, atau hanya berisi tanda '-'
-    const isEmptyTarget = !item.isi_target || item.isi_target.trim() === '' || item.isi_target.trim() === '-';
+                    const isEmptyTarget = !item.isi_target || item.isi_target.trim() === '' || item.isi_target.trim() === '-';
+                    if (Number(item.status_selesai) === 1) selesaiCount++;
+                    
+                    const isChecked = Number(item.status_selesai) === 1 ? 'checked' : '';
+                    let styleCoret = '';
+                    let statusCheckboxAttr = '';
+                    let labelKeterangan = '';
 
-    if (Number(item.status_selesai) === 1) selesaiCount++;
-    
-    const isChecked = Number(item.status_selesai) === 1 ? 'checked' : '';
-    
-    // Atur gaya tampilan berdasarkan ketersediaan target
-    let styleCoret = '';
-    let statusCheckboxAttr = '';
-    let labelKeterangan = '';
+                    if (isEmptyTarget) {
+                        styleCoret = 'text-gray-400 italic text-sm';
+                        statusCheckboxAttr = 'disabled';
+                        labelKeterangan = '<span class="text-xs text-gray-400 block font-normal">(Tidak ada target)</span>';
+                    } else {
+                        styleCoret = Number(item.status_selesai) === 1 ? 'line-through text-gray-400 text-sm' : 'text-[#113f59] text-sm';
+                        statusCheckboxAttr = Number(item.status_selesai) === 1 ? 'checked' : '';
+                    }
 
-    if (isEmptyTarget) {
-        styleCoret = 'text-gray-400 italic';
-        statusCheckboxAttr = 'disabled';
-        labelKeterangan = '<span class="text-xs text-gray-400 block font-normal">(Tidak ada target)</span>';
-    } else {
-        styleCoret = Number(item.status_selesai) === 1 ? 'line-through text-gray-400' : 'text-[#113f59]';
-        statusCheckboxAttr = Number(item.status_selesai) === 1 ? 'checked' : '';
-    }
-
-    container.innerHTML += `
-        <div class="flex items-center justify-between bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059] transition-all">
-            <div class="flex items-center gap-4 flex-1">
-                <span class="w-20 font-bold text-[#113f59]">${item.hari}</span>
-                <div class="flex-1">
-                    <span id="text-${item.id}" class="font-semibold ${styleCoret}">${isEmptyTarget ? 'Belum ada target di hari ini' : item.isi_target}</span>
-                    ${labelKeterangan}
-                </div>
-            </div>
-            <label class="flex items-center ${isEmptyTarget ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} gap-2">
-                <span class="text-sm font-bold text-gray-600">Selesai</span>
-                <input type="checkbox" ${isChecked} ${statusCheckboxAttr} onchange="updateStatus(${item.id}, this.checked)" 
-                    class="w-5 h-5 text-[#113f59] border-[#c5a059] rounded ${isEmptyTarget ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer'}">
-            </label>
-        </div>
-    `;
-});
+                    container.innerHTML += `
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#f0ebd8]/50 p-3 md:p-4 rounded-lg border border-[#c5a059]">
+                            <div class="flex items-center gap-4 flex-1">
+                                <span class="w-20 font-bold text-[#113f59] text-sm">${item.hari}</span>
+                                <div class="flex-1">
+                                    <span class="font-semibold ${styleCoret}">${isEmptyTarget ? 'Belum ada target di hari ini' : item.isi_target}</span>
+                                    ${labelKeterangan}
+                                </div>
+                            </div>
+                            <label class="flex items-center justify-end ${isEmptyTarget ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} gap-2">
+                                <span class="text-sm font-bold text-gray-600">Selesai</span>
+                                <input type="checkbox" ${isChecked} ${statusCheckboxAttr} onchange="updateStatus(${item.id}, this.checked)" 
+                                    class="w-5 h-5 text-[#113f59] border-[#c5a059] rounded ${isEmptyTarget ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer'}">
+                            </label>
+                        </div>
+                    `;
+                });
 
                 updateProgress(selesaiCount, data.length);
             } catch (err) {
-                console.error("Gagal memuat target:", err);
                 container.innerHTML = `<p class="text-center text-gray-500 italic py-6">Belum ada target untuk pekan ke-${pekan}.</p>`;
                 updateProgress(0, 0);
             }
         }
 
-        async function cekPekanAktif() {
+        async function cekPekanAktifSantri() {
             try {
-                // Coba ambil dari endpoint pekan-aktif
-                const res = await fetch(`/api/target/pekan-aktif`, { 
-                    headers: { 'Authorization': `Bearer ${token}` } 
-                });
-                
+                const res = await fetch(`/api/target/pekan-aktif`, { headers: { 'Authorization': `Bearer ${token}` } });
                 let pekanMaksimal = 1;
                 if (res.ok) {
                     const data = await res.json();
                     pekanMaksimal = data.pekan_aktif || 1;
-                } else {
-                    // Fallback cadangan jika endpoint khusus gagal: ambil dari rute umum
-                    const resAll = await fetch(`/api/target`, { headers: { 'Authorization': `Bearer ${token}` } });
-                    if (resAll.ok) {
-                        const allData = await resAll.json();
-                        if (Array.isArray(allData) && allData.length > 0) {
-                            pekanMaksimal = Math.max(...allData.map(item => Number(item.pekan_ke) || 1));
-                        }
-                    }
                 }
-                
-                const labelPekan = document.getElementById('labelPekanAktif');
-                if (labelPekan) {
-                    labelPekan.innerText = `Pekan ke-${pekanMaksimal}`;
-                }
-                
-                document.getElementById('filterPekan').value = pekanMaksimal;
-                loadTargetSaya();
+                document.getElementById('labelPekanAktif').innerText = `Pekan ke-${pekanMaksimal}`;
+                document.getElementById('filterPekanSantri').value = pekanMaksimal;
+                loadTargetSantri();
             } catch (err) {
-                console.error("Gagal mendeteksi pekan aktif:", err);
-                loadTargetSaya();
+                loadTargetSantri();
             }
         }
 
         function updateProgress(selesai, total) {
             const progressBar = document.getElementById('progressBar');
             const textProgres = document.getElementById('textProgres');
-            
             if (progressBar && textProgres) {
                 const persen = total === 0 ? 0 : Math.round((selesai / total) * 100);
                 progressBar.style.width = `${persen}%`;
@@ -194,7 +273,189 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ status_selesai })
             });
-            loadTargetSaya();
+            loadTargetSantri();
+        }
+
+        // ================= LOGIKA HALAMAN GURU (INPUT & KELOLA) =================
+        async function loadDaftarMuridSemua() {
+            try {
+                const res = await fetch('/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                
+                const selectInput = document.getElementById('pilihMuridInput');
+                const selectKelola = document.getElementById('pilihMuridKelola');
+                
+                selectInput.innerHTML = '<option value="" disabled selected>- Pilih Santri -</option>';
+                selectKelola.innerHTML = '<option value="" disabled selected>- Pilih Santri -</option>';
+                
+                data.forEach(m => {
+                    selectInput.innerHTML += `<option value="${m.id}">${m.nama_lengkap}</option>`;
+                    selectKelola.innerHTML += `<option value="${m.id}">${m.nama_lengkap}</option>`;
+                });
+            } catch (err) {
+                console.error("Gagal memuat murid");
+            }
+        }
+
+        function inisialisasiFormInput() {
+            const container = document.getElementById('containerHariInput');
+            container.innerHTML = '';
+            daftarHari.forEach(hari => {
+                container.innerHTML += `
+                    <div class="flex flex-col md:flex-row items-center gap-3 bg-[#f0ebd8]/40 p-3 rounded border border-[#c5a059]">
+                        <span class="w-full md:w-24 font-bold text-[#113f59] text-base">${hari}</span>
+                        <input type="text" data-hari="${hari}" placeholder="Contoh: Muroja'ah Surah Al-Mulk ayat 1-15" 
+                            class="input-target flex-1 w-full border border-[#c5a059] p-2 rounded bg-white outline-none text-sm focus:ring-1 focus:ring-[#113f59]">
+                    </div>
+                `;
+            });
+        }
+
+        // Auto deteksi pekan saat santri dipilih di form input
+        document.getElementById('pilihMuridInput').addEventListener('change', async function() {
+            const muridId = this.value;
+            if (!muridId) return;
+            try {
+                const res = await fetch(`/api/target?murid_id=${muridId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                const inputPekan = document.getElementById('inputPekanBaru');
+                if (data && data.length > 0) {
+                    const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
+                    inputPekan.value = pekanMaksimal + 1;
+                    document.getElementById('infoPekanAktif').innerText = `Pekan terakhir: ${pekanMaksimal}`;
+                } else {
+                    inputPekan.value = 1;
+                    document.getElementById('infoPekanAktif').innerText = `Belum ada target sebelumnya`;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        async function simpanTargetBaru() {
+            const murid_id = document.getElementById('pilihMuridInput').value;
+            const pekan_ke = document.getElementById('inputPekanBaru').value;
+
+            if (!murid_id) { alert('Pilih santri terlebih dahulu!'); return; }
+
+            const targets = [];
+            document.querySelectorAll('.input-target').forEach(input => {
+                targets.push({
+                    hari: input.getAttribute('data-hari'),
+                    isi_target: input.value.trim() || '-'
+                });
+            });
+
+            try {
+                const res = await fetch('/api/target', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ murid_id, pekan_ke, targets })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    document.getElementById('pilihMuridInput').value = "";
+                    document.querySelectorAll('.input-target').forEach(i => i.value = "");
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Terjadi kesalahan jaringan.');
+            }
+        }
+
+        async function cariTargetKelola() {
+            const muridId = document.getElementById('pilihMuridKelola').value;
+            const pekanKe = document.getElementById('inputPekanKelola').value;
+            const container = document.getElementById('listEditTarget');
+            const containerAksi = document.getElementById('containerAksiPekan');
+
+            if (!muridId) { alert('Pilih santri dulu!'); return; }
+
+            container.innerHTML = '<p class="text-center">Mencari data...</p>';
+            containerAksi.innerHTML = '';
+
+            const res = await fetch(`/api/target?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = `<p class="text-center text-red-500 font-bold py-4 text-sm">Belum ada target di pekan ke-${pekanKe} untuk santri ini.</p>`;
+                return;
+            }
+
+            containerAksi.innerHTML = `
+                <div class="flex flex-col md:flex-row justify-between items-center gap-3 bg-red-50 p-3 rounded-lg border border-red-300">
+                    <span class="text-xs md:text-sm font-bold text-red-700 text-center md:text-left">⚠️ Hapus seluruh target untuk Pekan ke-${pekanKe}?</span>
+                    <button onclick="hapusPekanTarget(${muridId}, ${pekanKe})" class="bg-red-600 text-white font-bold text-xs px-4 py-2 rounded shadow hover:bg-red-700 transition-colors whitespace-nowrap">
+                        Hapus Target Pekan Ini
+                    </button>
+                </div>
+            `;
+
+            data.sort((a, b) => daftarHari.indexOf(a.hari) - daftarHari.indexOf(b.hari));
+
+            container.innerHTML = '';
+            data.forEach(item => {
+                const badgeStatus = item.status_selesai === 1 
+                    ? `<span class="text-[10px] md:text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">Selesai</span>` 
+                    : `<span class="text-[10px] md:text-xs font-bold text-gray-500">Belum Selesai</span>`;
+
+                container.innerHTML += `
+                    <div class="flex flex-col md:flex-row md:items-center gap-3 bg-[#f0ebd8]/40 p-3 md:p-4 rounded border border-[#c5a059]">
+                        <div class="w-full md:w-32 flex justify-between md:block">
+                            <span class="font-bold text-[#113f59] text-base">${item.hari}</span>
+                            <div class="md:mt-1">${badgeStatus}</div>
+                        </div>
+                        <input type="text" id="edit-isi-${item.id}" value="${item.isi_target}" 
+                            class="flex-1 border border-[#c5a059] p-2 rounded bg-white outline-none text-sm focus:ring-1 focus:ring-[#113f59]">
+                        <button onclick="simpanPerubahan(${item.id})" class="bg-[#c5a059] text-[#113f59] font-bold px-4 py-2 rounded shadow hover:bg-yellow-600 hover:text-white transition-colors text-sm whitespace-nowrap">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function simpanPerubahan(id) {
+            const inputBaru = document.getElementById(`edit-isi-${id}`).value;
+            try {
+                const res = await fetch(`/api/target/${id}/edit`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ isi_target: inputBaru })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert('Sukses: ' + result.message);
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Gagal terhubung ke server.');
+            }
+        }
+
+        async function hapusPekanTarget(muridId, pekanKe) {
+            if (!confirm(`Yakin ingin menghapus seluruh target Pekan ke-${pekanKe} untuk santri ini?`)) return;
+            try {
+                const res = await fetch(`/api/target/pekan?murid_id=${muridId}&pekan_ke=${pekanKe}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    document.getElementById('listEditTarget').innerHTML = `<p class="text-center text-gray-500 italic py-8 text-sm">Target pekan ke-${pekanKe} telah dihapus.</p>`;
+                    document.getElementById('containerAksiPekan').innerHTML = '';
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Terjadi kesalahan jaringan.');
+            }
         }
     </script>
 </body>
