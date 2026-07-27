@@ -96,13 +96,11 @@
             badge.className = "inline-block mt-2 px-3 py-1 text-xs font-bold text-white bg-[#113f59] rounded-full";
         }
 
-        // 4. Logika Arah Menu Target Muroja'ah 
-        const btnTarget = document.getElementById('linkTarget');
-        if (role === 'guru') {
-            btnTarget.href = 'input-target.html'; 
-        } else {
-            btnTarget.href = 'target-saya.html'; 
-        }
+        // Logika Arah Menu Target Muroja'ah (Diperbarui karena file sudah disatukan)
+const btnTarget = document.getElementById('linkTarget');
+if (btnTarget) {
+    btnTarget.href = 'manajemen-target.html';
+}
 
         // 5. Logika Logout
         document.getElementById('btnLogout').addEventListener('click', () => {
