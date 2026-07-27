@@ -164,20 +164,19 @@ data.harian.sort((a, b) => urutanHari.indexOf(a.hari) - urutanHari.indexOf(b.har
                                 <td class="border border-[#c5a059] p-0">
                                     <select class="select-nilai-hafalan w-full h-full p-2 bg-transparent outline-none cursor-pointer">
                                         <option value="">- Nilai -</option>
-                                        <option value="mumtaz" ${row.nilai_hafalan === 'mumtaz' ? 'selected' : ''}>ممتاز</option>
-                                        <option value="jayyid_jiddan" ${row.nilai_hafalan === 'jayyid_jiddan' ? 'selected' : ''}>جيد جدا</option>
-                                        <option value="jayyid" ${row.nilai_hafalan === 'jayyid' ? 'selected' : ''}>جيد</option>
+                                        <option value="ممتاز" ${row.nilai_hafalan === 'ممتاز' ? 'selected' : ''}>ممتاز</option>
+                                        <option value="جيد جدا" ${row.nilai_hafalan === 'جيد جدا' ? 'selected' : ''}>جيد جدا</option>
+                                        <option value="جيد" ${row.nilai_hafalan === 'جيد' ? 'selected' : ''}>جيد</option>
                                     </select>
                                 </td>
                                 <td class="border border-[#c5a059] p-0"><input type="text" class="input-murojaah w-full h-full p-2 bg-transparent outline-none focus:bg-[#f0ebd8]" value="${row.murojaah_surah_ayat || ''}"></td>
                                 <td class="border border-[#c5a059] p-0">
                                     <select class="select-nilai-murojaah w-full h-full p-2 bg-transparent outline-none cursor-pointer">
                                         <option value="">- Nilai -</option>
-                                        <option value="mumtaz" ${row.nilai_murojaah === 'mumtaz' ? 'selected' : ''}>ممتاز</option>
-                                        <option value="jayyid_jiddan" ${row.nilai_murojaah === 'jayyid_jiddan' ? 'selected' : ''}>جيد جدا</option>
-                                        <option value="jayyid" ${row.nilai_murojaah === 'jayyid' ? 'selected' : ''}>جيد</option>
+                                        <option value="ممتاز" ${row.nilai_murojaah === 'ممتاز' ? 'selected' : ''}>ممتاز</option>
+                                        <option value="جيد جدا" ${row.nilai_murojaah === 'جيد جدا' ? 'selected' : ''}>جيد جدا</option>
+                                        <option value="جيد" ${row.nilai_murojaah === 'جيد' ? 'selected' : ''}>جيد</option>
                                     </select>
-                                </td>
                                 <td class="border border-[#c5a059] p-0"><input type="text" class="input-catatan w-full h-full p-2 bg-transparent outline-none focus:bg-[#f0ebd8]" value="${row.catatan_harian || ''}"></td>
                             `;
                         } else {
