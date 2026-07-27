@@ -200,6 +200,9 @@
                     return;
                 }
 
+                // Tentukan teks tombol berdasarkan role
+                const teksAksi = (role === 'guru') ? 'Lihat / Edit' : 'Lihat';
+
                 tbody.innerHTML = '';
                 data.forEach((item, index) => {
                     tbody.innerHTML += `
@@ -209,7 +212,7 @@
                             <td class="p-2 border">Pekan ke-${item.pekan_ke}</td>
                             <td class="p-2 border">${item.tanggal_mulai}</td>
                             <td class="p-2 border">
-                                <a href="manajemen-rekap.html?id=${item.id}" class="bg-[#113f59] text-white px-3 py-1 rounded text-xs font-bold hover:bg-[#0c2d40]">Lihat / Edit</a>
+                                <a href="manajemen-rekap.html?id=${item.id}" class="bg-[#113f59] text-white px-3 py-1 rounded text-xs font-bold hover:bg-[#0c2d40]">${teksAksi}</a>
                             </td>
                         </tr>
                     `;
