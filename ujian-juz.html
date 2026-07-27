@@ -19,12 +19,14 @@
 
     <div class="max-w-5xl mx-auto bg-white/95 p-6 rounded-xl shadow-lg border-2 border-[#c5a059]">
         
+        <!-- Header Navigasi -->
         <div class="flex justify-between items-center mb-6 border-b-2 border-[#c5a059] pb-4">
             <a href="menu-utama.html" class="text-[#113f59] font-bold hover:underline">&larr; Menu Utama</a>
             <h1 class="text-2xl font-bold text-[#113f59]">Ujian Kenaikan Juz</h1>
             <div class="w-24"></div>
         </div>
 
+        <!-- PANEL GURU: Pilih Santri & Mulai Ujian -->
         <div id="panelGuru" class="hidden mb-6 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
             <h2 class="font-bold text-[#113f59] mb-3">Panel Pengaturan Ujian (Muhaffidz)</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -44,6 +46,7 @@
             </div>
         </div>
 
+        <!-- PANEL INFORMASI & DURASI (Santri & Guru) -->
         <div id="panelUjianAktif" class="hidden space-y-6 mb-10">
             
             <div class="flex flex-col md:flex-row justify-between items-center bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059]">
@@ -57,24 +60,28 @@
                 </div>
             </div>
 
+            <!-- KERTAS TASMI' (Tabel Utama) -->
             <div class="bg-white p-4 rounded-lg border border-[#c5a059] overflow-x-auto">
-                <h3 class="font-bold text-[#113f59] mb-3 text-lg">بطاقة التسميع</h3>
+                <h3 class="font-bold text-[#113f59] mb-3 text-lg text-center">Kertas Tasmi' Ujian</h3>
                 <table class="w-full border-collapse border border-[#c5a059] text-center bg-white text-sm">
                     <thead>
                         <tr class="bg-[#113f59] text-white">
-                            <th class="border border-[#c5a059] p-2">رقم</th>
-                            <th class="border border-[#c5a059] p-2">تنبيه</th>
-                            <th class="border border-[#c5a059] p-2">خطأ</th>
-                            <th class="border border-[#c5a059] p-2">تقدير</th>
-                            <th class="border border-[#c5a059] p-2">مقبول / مردود</th>
-                            <th class="border border-[#c5a059] p-2">مستمع</th>
+                            <th class="border border-[#c5a059] p-2">No</th>
+                            <th class="border border-[#c5a059] p-2">Juz</th>
+                            <th class="border border-[#c5a059] p-2">Tanbih</th>
+                            <th class="border border-[#c5a059] p-2">Khoto'</th>
+                            <th class="border border-[#c5a059] p-2">Taqdir</th>
+                            <th class="border border-[#c5a059] p-2">Maqbul / Mardud</th>
+                            <th class="border border-[#c5a059] p-2">Mustami'</th>
                         </tr>
                     </thead>
                     <tbody id="tabelKertasTasmi">
-                        </tbody>
+                        <!-- Baris dirender dinamis -->
+                    </tbody>
                 </table>
             </div>
 
+            <!-- PANEL PENILAIAN AKHIR (Hanya untuk Guru) -->
             <div id="panelNilaiGuru" class="hidden bg-[#fdfbf7] p-5 rounded-lg border-2 border-[#c5a059]">
                 <h3 class="font-bold text-[#113f59] text-lg mb-3">Form Penilaian Akhir Ujian (Muhaffidz)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -101,6 +108,7 @@
 
         </div>
 
+        <!-- DAFTAR RIWAYAT UJIAN SELESAI -->
         <div class="bg-white p-5 rounded-lg border border-[#c5a059] mt-6">
             <h3 class="font-bold text-[#113f59] text-lg mb-4">Riwayat Ujian Kenaikan Juz Selesai</h3>
             <div class="overflow-x-auto">
@@ -123,6 +131,7 @@
 
     </div>
 
+    <!-- MODAL DETAIL RIWAYAT UJIAN -->
     <div id="modalDetail" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-2xl w-full p-6 rounded-xl border-2 border-[#c5a059] max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -130,7 +139,8 @@
                 <button onclick="tutupModalDetail()" class="text-red-500 font-bold text-lg">&times; Tutup</button>
             </div>
             <div id="kontenDetailModal" class="space-y-4 text-sm">
-                </div>
+                <!-- Dimuat lewat JS -->
+            </div>
         </div>
     </div>
 
@@ -141,6 +151,7 @@
 
         let activeUjianId = null;
         let timerInterval = null;
+        let daftarJuzGlobal = [];
 
         window.onload = function() {
             if (role === 'guru') {
@@ -199,37 +210,58 @@
                 panelUjian.classList.remove('hidden');
 
                 document.getElementById('labelStatus').innerText = data.ujian.status_ujian;
-                const listJuz = JSON.parse(data.ujian.daftar_juz || '[]');
-                document.getElementById('labelDaftarJuz').innerText = `Juz (${listJuz.join(', ')})`;
+                daftarJuzGlobal = JSON.parse(data.ujian.daftar_juz || '[]');
+                document.getElementById('labelDaftarJuz').innerText = `Juz (${daftarJuzGlobal.join(', ')})`;
 
                 // Mulai Timer Durasi
                 mulaiTimer(new Date(data.ujian.waktu_mulai));
 
                 const tbody = document.getElementById('tabelKertasTasmi');
                 tbody.innerHTML = '';
-                data.tasmi.forEach(row => {
+                
+                // Balik urutan baris agar nomor dimulai dari bawah ke atas (seperti detail rekap: nomor 1 di bawah / dibalik)
+                const totalBaris = data.tasmi.length;
+                data.tasmi.forEach((row, index) => {
+                    // Penomoran dibalik: baris terbawah jadi nomor 1, atau disesuaikan urutan terbalik
+                    const nomorUrut = totalBaris - index;
+                    // Tentukan kolom juz: jika nomor urut sesuai dengan urutan juz, tampilkan, jika baris tambahan kosongkan atau '-'
+                    const infoJuz = daftarJuzGlobal[nomorUrut - 1] ? `Juz ${daftarJuzGlobal[nomorUrut - 1]}` : '-';
+
                     const isReadonly = role === 'guru' ? 'disabled' : '';
                     tbody.innerHTML += `
                         <tr class="hover:bg-[#f0ebd8]/40">
-                            <td class="border border-[#c5a059] p-2 font-bold">${row.nomor}</td>
-                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.تنبيه}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded تنبيه bg-transparent"></td>
-                            <td class="border border-[#c5a059] p-1"><input type="number" ${isReadonly} value="${row.خطأ}" onchange="updateTasmi(${row.id}, this)" class="w-16 text-center border rounded خطأ bg-transparent"></td>
+                            <td class="border border-[#c5a059] p-2 font-bold">${nomorUrut}</td>
+                            <td class="border border-[#c5a059] p-2 font-semibold text-[#113f59]">${infoJuz}</td>
                             <td class="border border-[#c5a059] p-1">
-                                <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="تقدير border rounded p-1 bg-transparent w-full">
+                                <div class="flex items-center justify-center space-x-1">
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'tanbih', -1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">-</button>
+                                    <input type="number" ${isReadonly} id="tanbih_${row.id}" value="${row.tanbih}" onchange="updateTasmiManual(${row.id})" class="w-12 text-center border rounded tanbih bg-transparent">
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'tanbih', 1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">+</button>
+                                </div>
+                            </td>
+                            <td class="border border-[#c5a059] p-1">
+                                <div class="flex items-center justify-center space-x-1">
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'khoto', -1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">-</button>
+                                    <input type="number" ${isReadonly} id="khoto_${row.id}" value="${row.khoto}" onchange="updateTasmiManual(${row.id})" class="w-12 text-center border rounded khoto bg-transparent">
+                                    <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'khoto', 1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">+</button>
+                                </div>
+                            </td>
+                            <td class="border border-[#c5a059] p-1">
+                                <select ${isReadonly} id="taqdir_${row.id}" onchange="updateTasmiManual(${row.id})" class="taqdir border rounded p-1 bg-transparent w-full">
                                     <option value="">- Pilih -</option>
-                                    <option value="ممتاز" ${row.تقدير==='ممتاز'?'selected':''}>ممتاز</option>
-                                    <option value="جيد جدا" ${row.تقدير==='جيد جدا'?'selected':''}>جيد جدا</option>
-                                    <option value="جيد" ${row.تقدير==='جيد'?'selected':''}>جيد</option>
+                                    <option value="mumtaz" ${row.taqdir==='mumtaz'?'selected':''}>Mumtaz</option>
+                                    <option value="jayyid_jiddan" ${row.taqdir==='jayyid_jiddan'?'selected':''}>Jayyid Jiddan</option>
+                                    <option value="jayyid" ${row.taqdir==='jayyid'?'selected':''}>Jayyid</option>
                                 </select>
                             </td>
                             <td class="border border-[#c5a059] p-1">
-                                <select ${isReadonly} onchange="updateTasmi(${row.id}, this)" class="status border rounded p-1 bg-transparent w-full">
+                                <select ${isReadonly} id="status_${row.id}" onchange="updateTasmiManual(${row.id})" class="status border rounded p-1 bg-transparent w-full">
                                     <option value="">- Pilih -</option>
-                                    <option value="مقبول" ${row.status_kelulusan==='مقبول'?'selected':''}>مقبول</option>
-                                    <option value="مردود" ${row.status_kelulusan==='مردود'?'selected':''}>مردود</option>
+                                    <option value="maqbul" ${row.status_kelulusan==='maqbul'?'selected':''}>Maqbul</option>
+                                    <option value="mardud" ${row.status_kelulusan==='mardud'?'selected':''}>Mardud</option>
                                 </select>
                             </td>
-                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} value="${row.مستمع || ''}" onchange="updateTasmi(${row.id}, this)" class="w-full border rounded px-2 مستمع bg-transparent" placeholder="الأخ/الأستاذ"></td>
+                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="mustami_${row.id}" value="${row.mustami || ''}" onchange="updateTasmiManual(${row.id})" class="w-full border rounded px-2 mustami bg-transparent" placeholder="Nama penyimak"></td>
                         </tr>
                     `;
                 });
@@ -259,15 +291,24 @@
             }, 1000);
         }
 
-        async function updateTasmi(id, element) {
+        async function ubahCount(id, field, delta) {
             if (role === 'guru') return;
-            const tr = element.closest('tr');
+            const inputEl = document.getElementById(`${field}_${id}`);
+            let val = parseInt(inputEl.value) || 0;
+            val += delta;
+            if (val < 0) val = 0;
+            inputEl.value = val;
+            await updateTasmiManual(id);
+        }
+
+        async function updateTasmiManual(id) {
+            if (role === 'guru') return;
             const body = {
-                تنبيه: tr.querySelector('.تنبيه').value,
-                خطأ: tr.querySelector('.خطأ').value,
-                تقدير: tr.querySelector('.تقدير').value,
-                status_kelulusan: tr.querySelector('.status').value,
-                مستمع: tr.querySelector('.مستمع').value
+                tanbih: document.getElementById(`tanbih_${id}`).value,
+                khoto: document.getElementById(`khoto_${id}`).value,
+                taqdir: document.getElementById(`taqdir_${id}`).value,
+                status_kelulusan: document.getElementById(`status_${id}`).value,
+                mustami: document.getElementById(`mustami_${id}`).value
             };
             await fetch(`/api/ujian/tasmi/${id}`, {
                 method: 'PUT',
@@ -290,8 +331,8 @@
             const result = await res.json();
             if (res.ok) {
                 alert(result.message);
-                if (timerInterval) clearInterval(timerInterval); // Hentikan durasi
-                window.location.reload(); // Refresh halaman otomatis
+                if (timerInterval) clearInterval(timerInterval);
+                window.location.reload();
             } else {
                 alert('Gagal: ' + result.error);
             }
@@ -337,26 +378,33 @@
                     <p><strong>Nilai Hifdz:</strong> ${u.nilai_hifdz} | <strong>Tajwid:</strong> ${u.nilai_tajwid} | <strong>Tartil:</strong> ${u.nilai_tartil}</p>
                     <p><strong>Nilai Akhir (Rata-rata):</strong> <span class="text-green-600 font-bold">${Number(u.nilai_akhir).toFixed(2)}</span></p>
                     <hr class="my-2">
-                    <h4 class="font-bold text-[#113f59]">Kertas Tasmi' Selesai:</h4>
+                    <h4 class="font-bold text-[#113f59] text-center">Kertas Tasmi' Selesai</h4>
                     <table class="w-full border-collapse border text-center text-xs mt-2">
                         <tr class="bg-[#113f59] text-white">
-                            <th class="border p-1">رقم</th>
-                            <th class="border p-1">تنبيه</th>
-                            <th class="border p-1">خطأ</th>
-                            <th class="border p-1">تقدير</th>
-                            <th class="border p-1">مقبول/مردود</th>
-                            <th class="border p-1">مستمع</th>
+                            <th class="border p-1">No</th>
+                            <th class="border p-1">Juz</th>
+                            <th class="border p-1">Tanbih</th>
+                            <th class="border p-1">Khoto'</th>
+                            <th class="border p-1">Taqdir</th>
+                            <th class="border p-1">Maqbul/Mardud</th>
+                            <th class="border p-1">Mustami'</th>
                         </tr>
                 `;
-                data.tasmi.forEach(t => {
+                const totalT = data.tasmi.length;
+                const listJuzModal = JSON.parse(u.daftar_juz || '[]');
+                
+                data.tasmi.forEach((t, idx) => {
+                    const noModal = totalT - idx;
+                    const juzModal = listJuzModal[noModal - 1] ? `Juz ${listJuzModal[noModal - 1]}` : '-';
                     html += `
                         <tr>
-                            <td class="border p-1">${t.nomor}</td>
-                            <td class="border p-1">${t.تنبيه}</td>
-                            <td class="border p-1">${t.خطأ}</td>
-                            <td class="border p-1">${t.تقدير || '-'}</td>
+                            <td class="border p-1">${noModal}</td>
+                            <td class="border p-1 font-semibold">${juzModal}</td>
+                            <td class="border p-1">${t.tanbih}</td>
+                            <td class="border p-1">${t.khoto}</td>
+                            <td class="border p-1">${t.taqdir || '-'}</td>
                             <td class="border p-1">${t.status_kelulusan || '-'}</td>
-                            <td class="border p-1">${t.مستمع || '-'}</td>
+                            <td class="border p-1">${t.mustami || '-'}</td>
                         </tr>
                     `;
                 });
