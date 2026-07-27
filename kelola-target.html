@@ -27,9 +27,9 @@
 
         <div class="flex flex-wrap items-end gap-4 mb-8 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
             <div class="flex-1 min-w-[200px]">
-                <label class="block font-bold text-[#113f59] mb-1">Pilih Siswa:</label>
+                <label class="block font-bold text-[#113f59] mb-1">Pilih Santri:</label>
                 <select id="pilihMurid" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white outline-none cursor-pointer">
-                    <option value="" disabled selected>- Memuat Siswa -</option>
+                    <option value="" disabled selected>- Memuat Santri -</option>
                 </select>
             </div>
             <div class="w-32">
@@ -46,7 +46,7 @@
 
         <!-- Daftar Target yang Bisa Diedit -->
         <div id="listEditTarget" class="space-y-4">
-            <p class="text-center text-gray-500 italic py-8">Silakan pilih siswa dan pekan untuk menampilkan target.</p>
+            <p class="text-center text-gray-500 italic py-8">Silakan pilih Santri dan pekan untuk menampilkan target.</p>
         </div>
 
     </div>
@@ -60,7 +60,7 @@
             const res = await fetch('/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             const select = document.getElementById('pilihMurid');
-            select.innerHTML = '<option value="" disabled selected>- Pilih Siswa -</option>';
+            select.innerHTML = '<option value="" disabled selected>- Pilih Santri -</option>';
             data.forEach(m => {
                 select.innerHTML += `<option value="${m.id}">${m.nama_lengkap}</option>`;
             });
@@ -73,7 +73,7 @@
             const container = document.getElementById('listEditTarget');
             const containerAksi = document.getElementById('containerAksiPekan');
 
-            if (!muridId) { alert('Pilih siswa dulu!'); return; }
+            if (!muridId) { alert('Pilih santri dulu!'); return; }
 
             container.innerHTML = '<p class="text-center">Mencari data...</p>';
             containerAksi.innerHTML = '';
@@ -84,7 +84,7 @@
             const data = await res.json();
 
             if (data.length === 0) {
-                container.innerHTML = `<p class="text-center text-red-500 font-bold py-4">Belum ada target di pekan ke-${pekanKe} untuk siswa ini.</p>`;
+                container.innerHTML = `<p class="text-center text-red-500 font-bold py-4">Belum ada target di pekan ke-${pekanKe} untuk santri ini.</p>`;
                 return;
             }
 
@@ -125,7 +125,7 @@
         }
 
         async function hapusPekanTarget(muridId, pekanKe) {
-            if (!confirm(`Yakin ingin menghapus seluruh target Pekan ke-${pekanKe} untuk siswa ini? Tindakan ini tidak dapat dibatalkan.`)) {
+            if (!confirm(`Yakin ingin menghapus seluruh target Pekan ke-${pekanKe} untuk santri ini? Tindakan ini tidak dapat dibatalkan.`)) {
                 return;
             }
 

@@ -19,7 +19,7 @@
 
     <div class="flex justify-between items-center mb-6 border-b-2 border-[#c5a059] pb-4">
             <a href="menu-utama.html" class="text-[#113f59] font-bold hover:underline">&larr; Menu Utama</a>
-            <h1 class="text-2xl font-bold text-[#113f59]">Buat Target Muroja'ah Siswa</h1>
+            <h1 class="text-2xl font-bold text-[#113f59]">Buat Target Muroja'ah Santri</h1>
             
             <!-- Tombol pindah ke halaman Edit -->
             <a href="kelola-target.html" class="bg-[#c5a059] text-[#113f59] font-bold text-sm px-4 py-2 rounded shadow hover:bg-yellow-600 hover:text-white transition-colors">
@@ -29,9 +29,9 @@
 
         <div class="flex flex-wrap gap-4 mb-6 bg-[#fdfbf7] p-4 rounded-lg border border-[#c5a059]">
             <div class="flex-1 min-w-[200px]">
-                <label class="block font-bold text-[#113f59] mb-1">Pilih Siswa:</label>
+                <label class="block font-bold text-[#113f59] mb-1">Pilih Santri:</label>
                 <select id="pilihMurid" class="w-full border-2 border-[#c5a059] p-2 rounded bg-white outline-none">
-                    <option value="" disabled selected>- Memuat Siswa -</option>
+                    <option value="" disabled selected>- Memuat Santri -</option>
                 </select>
             </div>
             <div class="w-32">
@@ -52,7 +52,7 @@
             </div>
 
         <button id="btnSimpanTarget" class="w-full bg-[#113f59] text-white font-bold py-3 rounded shadow hover:bg-[#0c2d40] border border-[#c5a059]">
-            Kirim Target ke Siswa
+            Kirim Target ke Santri
         </button>
 
     </div>
@@ -83,7 +83,7 @@
                 const res = await fetch('/api/murid', { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
                 const select = document.getElementById('pilihMurid');
-                select.innerHTML = '<option value="" disabled selected>- Pilih Siswa -</option>';
+                select.innerHTML = '<option value="" disabled selected>- Pilih Santri -</option>';
                 data.forEach(m => {
                     select.innerHTML += `<option value="${m.id}">${m.nama_lengkap}</option>`;
                 });
@@ -93,13 +93,13 @@
         }
         loadMurid();
 
-        // EVENT LISTENER: Otomatis deteksi pekan aktif saat siswa dipilih
+        // EVENT LISTENER: Otomatis deteksi pekan aktif saat Santri dipilih
         document.getElementById('pilihMurid').addEventListener('change', async function() {
             const muridId = this.value;
             if (!muridId) return;
 
             try {
-                // Ambil semua data target milik siswa ini untuk mencari pekan terakhirnya
+                // Ambil semua data target milik Santri ini untuk mencari pekan terakhirnya
                 const res = await fetch(`/api/target?murid_id=${muridId}`, { 
                     headers: { 'Authorization': `Bearer ${token}` } 
                 });
@@ -108,17 +108,17 @@
                 const inputPekan = document.getElementById('inputPekan');
 
                 if (data && data.length > 0) {
-                    // Cari nilai pekan terbesar yang sudah pernah diinput guru untuk siswa ini
+                    // Cari nilai pekan terbesar yang sudah pernah diinput guru untuk Santri ini
                     const pekanMaksimal = Math.max(...data.map(item => Number(item.pekan_ke) || 1));
                     
                     // Otomatis arahkan ke pekan berikutnya, atau tetap di pekan maksimal jika belum ada data baru
                     inputPekan.value = pekanMaksimal + 1;
                 } else {
-                    // Jika siswa belum punya target sama sekali, mulai dari Pekan 1
+                    // Jika Santri belum punya target sama sekali, mulai dari Pekan 1
                     inputPekan.value = 1;
                 }
             } catch (err) {
-                console.error("Gagal mendeteksi pekan aktif siswa:", err);
+                console.error("Gagal mendeteksi pekan aktif santri:", err);
             }
         });
 
@@ -127,7 +127,7 @@
             const murid_id = document.getElementById('pilihMurid').value;
             const pekan_ke = document.getElementById('inputPekan').value;
 
-            if (!murid_id) { alert('Pilih siswa terlebih dahulu!'); return; }
+            if (!murid_id) { alert('Pilih santri terlebih dahulu!'); return; }
 
             const targets = [];
             document.querySelectorAll('.input-target').forEach(input => {

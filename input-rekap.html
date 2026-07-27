@@ -274,17 +274,17 @@
                 });
                 const data = await response.json();
                 
-                // Cari div tempat kita menaruh input Pekan dan Tanggal, lalu tambahkan Dropdown Siswa secara dinamis
+                // Cari div tempat kita menaruh input Pekan dan Tanggal, lalu tambahkan Dropdown Santri secara dinamis
                 const headerForm = document.querySelector('.flex.flex-col.md\\:flex-row.justify-center.gap-6');
                 
-                let opsiMurid = `<option value="" disabled selected>- Pilih Siswa -</option>`;
+                let opsiMurid = `<option value="" disabled selected>- Pilih Santri -</option>`;
                 data.forEach(murid => {
                     opsiMurid += `<option value="${murid.id}">${murid.nama_lengkap}</option>`;
                 });
 
                 const dropdownHTML = `
                     <div class="flex items-center gap-2">
-                        <label>Siswa :</label>
+                        <label>Santri :</label>
                         <select id="pilihMurid" class="border-b-2 border-[#c5a059] bg-transparent px-2 outline-none focus:border-[#113f59] cursor-pointer">
                             ${opsiMurid}
                         </select>
@@ -310,7 +310,7 @@
             const catatan = document.getElementById('inputCatatan').value;
 
             if(!murid_id) {
-                alert("Mohon pilih Siswa terlebih dahulu!");
+                alert("Mohon pilih Santri terlebih dahulu!");
                 return;
             }
 
