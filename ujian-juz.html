@@ -52,7 +52,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center bg-[#f0ebd8]/50 p-4 rounded-lg border border-[#c5a059]">
                 <div>
                     <p class="font-bold text-[#113f59]">Status Ujian: <span id="labelStatus" class="text-green-600 uppercase font-bold">-</span></p>
-                    <p class="text-sm text-gray-700 mt-1">Daftar Juz yang Diuji: <span id="labelDaftarJuz" class="font-bold text-[#c5a059]">-</span></p>
+                    <p class="text-sm text-gray-700 mt-1">Jumlah Target Juz: <span id="labelDaftarJuz" class="font-bold text-[#c5a059]">-</span></p>
                 </div>
                 <div class="mt-3 md:mt-0 text-center bg-white px-4 py-2 rounded border border-[#c5a059] shadow-inner">
                     <span class="text-xs font-bold text-gray-500 block">Durasi Ujian:</span>
@@ -151,7 +151,6 @@
 
         let activeUjianId = null;
         let timerInterval = null;
-        let daftarJuzGlobal = [];
 
         window.onload = function() {
             if (role === 'guru') {
@@ -181,13 +180,10 @@
             const jumlah_juz = parseInt(document.getElementById('inputJumlahJuz').value);
             if (!murid_id) { alert('Pilih santri terlebih dahulu!'); return; }
 
-            const daftar_juz = [];
-            for (let i = 1; i <= jumlah_juz; i++) { daftar_juz.push(i); }
-
             const res = await fetch('/api/ujian/mulai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ murid_id, jumlah_juz, daftar_juz })
+                body: JSON.stringify({ murid_id, jumlah_juz, daftar_juz: [] })
             });
             const result = await res.json();
             if (res.ok) {
@@ -210,8 +206,7 @@
                 panelUjian.classList.remove('hidden');
 
                 document.getElementById('labelStatus').innerText = data.ujian.status_ujian;
-                daftarJuzGlobal = JSON.parse(data.ujian.daftar_juz || '[]');
-                document.getElementById('labelDaftarJuz').innerText = `Juz (${daftarJuzGlobal.join(', ')})`;
+                document.getElementById('labelDaftarJuz').innerText = `${data.ujian.jumlah_juz} Juz (+5 Cadangan)`;
 
                 // Mulai Timer Durasi
                 mulaiTimer(new Date(data.ujian.waktu_mulai));
@@ -219,13 +214,10 @@
                 const tbody = document.getElementById('tabelKertasTasmi');
                 tbody.innerHTML = '';
                 
-                // Urutan baris normal dari atas ke bawah (1, 2, 3...)
                 data.tasmi.forEach((row, index) => {
                     const nomorUrut = index + 1;
-                    const infoJuz = daftarJuzGlobal[index] ? `Juz ${daftarJuzGlobal[index]}` : '-';
                     const isReadonly = role === 'guru' ? 'disabled' : '';
 
-                    // Urutan kolom dibalik dari kanan ke kiri: Mustami' (kiri/terakhir di HTML) ... sampai No (kanan/pertama di HTML)
                     tbody.innerHTML += `
                         <tr class="hover:bg-[#f0ebd8]/40">
                             <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="mustami_${row.id}" value="${row.mustami || ''}" onchange="updateTasmiManual(${row.id})" class="w-full border rounded px-2 mustami bg-transparent" placeholder="Nama penyimak"></td>
@@ -258,7 +250,7 @@
                                     <button type="button" ${isReadonly} onclick="ubahCount(${row.id}, 'tanbih', 1)" class="px-2 bg-gray-200 hover:bg-gray-300 font-bold rounded">+</button>
                                 </div>
                             </td>
-                            <td class="border border-[#c5a059] p-2 font-semibold text-[#113f59]">${infoJuz}</td>
+                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="juz_teks_${row.id}" value="${row.juz_teks || ''}" onchange="updateTasmiManual(${row.id})" class="w-20 text-center border rounded juz_teks bg-transparent font-semibold text-[#113f59]" placeholder="Cth: 1"></td>
                             <td class="border border-[#c5a059] p-2 font-bold">${nomorUrut}</td>
                         </tr>
                     `;
@@ -306,7 +298,8 @@
                 khoto: document.getElementById(`khoto_${id}`).value,
                 taqdir: document.getElementById(`taqdir_${id}`).value,
                 status_kelulusan: document.getElementById(`status_${id}`).value,
-                mustami: document.getElementById(`mustami_${id}`).value
+                mustami: document.getElementById(`mustami_${id}`).value,
+                juz_teks: document.getElementById(`juz_teks_${id}`).value
             };
             await fetch(`/api/ujian/tasmi/${id}`, {
                 method: 'PUT',
@@ -388,11 +381,9 @@
                             <th class="border p-1">No</th>
                         </tr>
                 `;
-                const listJuzModal = JSON.parse(u.daftar_juz || '[]');
                 
                 data.tasmi.forEach((t, idx) => {
                     const noModal = idx + 1;
-                    const juzModal = listJuzModal[idx] ? `Juz ${listJuzModal[idx]}` : '-';
                     html += `
                         <tr>
                             <td class="border p-1">${t.mustami || '-'}</td>
@@ -400,7 +391,7 @@
                             <td class="border p-1">${t.taqdir || '-'}</td>
                             <td class="border p-1">${t.khoto}</td>
                             <td class="border p-1">${t.tanbih}</td>
-                            <td class="border p-1 font-semibold">${juzModal}</td>
+                            <td class="border p-1 font-semibold">${t.juz_teks || '-'}</td>
                             <td class="border p-1">${noModal}</td>
                         </tr>
                     `;
