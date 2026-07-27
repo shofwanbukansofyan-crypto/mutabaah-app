@@ -220,7 +220,7 @@
 
                     tbody.innerHTML += `
                         <tr class="hover:bg-[#f0ebd8]/40">
-                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="مستمع_${row.id}" value="${row.مستمع || ''}" onchange="updateTasmiManual(${row.id})" class="w-full border rounded px-2 مستمع bg-transparent" placeholder >الأخ/الأستاذ< dir="rtl"/td>
+                            <td class="border border-[#c5a059] p-1"><input type="text" ${isReadonly} id="مستمع_${row.id}" value="${row.مستمع || ''}" onchange="updateTasmiManual(${row.id})" class="w-full border rounded px-2 مستمع bg-transparent" placeholder="الأخ/الأستاذ" dir="rtl"></td>
                             <td class="border border-[#c5a059] p-1">
                                 <select ${isReadonly} id="status_${row.id}" onchange="updateTasmiManual(${row.id})" class="status border rounded p-1 bg-transparent w-full">
                                     <option value="">- مقبول -</option>
